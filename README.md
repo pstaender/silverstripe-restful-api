@@ -24,7 +24,7 @@ DataObject:
     - ApiDataObject
 ```
 
-To avoid unnessary authentication **during development** you can define a `adminAccessToken`.
+To avoid unnecessary authentication **during development** you can define a `adminAccessToken`. The check of `requiredGroup` and `requiredPermission` is not implemented, yet.
 
 ## How to use
 
@@ -32,11 +32,12 @@ To avoid unnessary authentication **during development** you can define a `admin
 
 #### Login
 
-`POST:http://localhost/auth/session` with body:
+`POST:http://localhost/auth/session` with (json) body:
 
 ```json
   {
-    "message":"resource deleted successfully"
+    "email":"your@email.com",
+    "password":"yourpassword"
   }
 ```
 
