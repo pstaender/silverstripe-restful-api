@@ -126,7 +126,21 @@ class ApiDataObject extends DataExtension {
     return $data;
   }
 
-  // function populateWithData($data) {
-  // }
+  function populateWithData($data, $only = null) {
+    // TODO: convert to array if DataObject
+    return $this->populateWithArrayData($data, $only);
+  }
+
+  function populateWithArrayData(array $data, $only = null) {
+    $hasOnlyFilter = is_array($only);
+    foreach($data as $key => $value) {
+      $field = ApiDataObject::real_field_name($key, $this->owner);
+      if (($hasOnlyFilter) && (!in_array($field, $only, true))) {
+        continue;
+      } else {
+        $this->owner->{$field} = $value;
+      }
+    }
+  }
 
 }

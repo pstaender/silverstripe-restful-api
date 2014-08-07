@@ -45,16 +45,16 @@ class ApiController extends Controller {
     $accesstoken = $this->getAccessTokenFromRequest();
     $member = null;
     if ($accesstoken) {
+
       $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
-      if ($adminAccessToken) {
-        if ($accesstoken === (string) $adminAccessToken) {
-          $member = Permission::get_members_by_permission('ADMIN')->First();
-        }
-      } else {
-        $session = $this->request->session;
-        if ($session) {
-          $member = $session->Member();
-        }
+      $session = $this->request->session;
+
+      if ($session) {
+        $member = $session->Member();
+      } elseif (($adminAccessToken) && ($accesstoken === (string) $adminAccessToken)) {
+        // if we have an fixed accesstoken defined in config and this one is used, load default admin
+        // this mode is reserved for development or testing only!
+        $member = Permission::get_members_by_permission('ADMIN')->First();
       }
     }
     $id = ($member) ? $member->ID : null;
@@ -96,11 +96,18 @@ class ApiController extends Controller {
     $parameters = [];
     $apiParameters = $this->stat('api_parameters');
 
-    if(!$this->hasAction($action)) {
-      return $this->sendError("Action `$action` isn't available on `$this->class`", 404);
+    $alternateAction = $action.$method; // actionMETHOD, e.g. indexPOST()
+    if ($this->hasAction($alternateAction)) {
+      $actualAction = $alternateAction; // prefer this naming
+    } else {
+      $actualAction = $action;
+    }
+
+    if(!$this->hasAction($actualAction)) {
+      return $this->sendError("Action `$actualAction` isn't available on `$this->class`", 404);
     }
     if(!$this->checkAccessAction($action) || in_array(strtolower($action), array('run', 'init'))) {
-      return $this->sendError("No permission to access `$action` on `$this->class`", 403);
+      return $this->sendError("No permission to access `$action` ($actualAction) on `$this->class`", 403);
     }
 
     $params = array();
@@ -173,7 +180,7 @@ class ApiController extends Controller {
       }
     }
     $this->parameters = $params;
-    return parent::handleAction($request, $action);
+    return parent::handleAction($request, $actualAction);
   }
 
   /**
@@ -197,7 +204,7 @@ class ApiController extends Controller {
       foreach($apiActions as $apiAction => $permission) {
         preg_match("/^(.+?):(.+)$/", $apiAction, $matches);
         if ((!isset($matches[1]))||(!isset($matches[2]))) {
-          return user_error("Ensure that `api_allowed_actions` fulfils the following pattern: `\$method:\$action` => `\$permission`");
+          return user_error("Ensure that `api_allowed_actions` fulfills the following pattern: `\$method:\$action` => `\$permission`");
         }
         $allowedMethod = strtoupper($matches[1]);
         $allowedAction = strtolower($matches[2]);
