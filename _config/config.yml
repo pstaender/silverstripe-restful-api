@@ -1,0 +1,17 @@
+---
+Name: RestfulApiConfig
+---
+ApiController:
+  underscoreFields: true
+  useAccesstokenAuth: true
+AuthSession:
+  validInMinutesFromNow: 10080
+  adminAccessToken: null
+  requiredGroup: null
+  requiredPermission: null
+DataObject:
+  jsonDateFormat: 'D M d Y H:i:s O'
+  underscoreFields: true
+  castDataObjectFields: true
+  extensions:
+    - ApiDataObject

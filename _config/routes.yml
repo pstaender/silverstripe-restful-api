@@ -1,0 +1,8 @@
+---
+Name: restfulapiroutes
+After:
+  - '#coreroutes'
+---
+Director:
+  rules:
+    'auth//$Action/$ID': 'AuthController'
