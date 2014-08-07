@@ -290,7 +290,7 @@ class ApiController extends Controller {
     return $this->sendData();
   }
 
-  function sendSuccessfulPut($code = 202, $msg = 'resource updated successfully') {
+  function sendSuccessfulPut($code = 201, $msg = 'resource updated successfully') {
     $this->statusCode = $code;
     $this->message = $msg;
     return $this->sendData();
@@ -300,6 +300,23 @@ class ApiController extends Controller {
     $this->statusCode = $code;
     $this->message = $msg;
     return $this->sendData();
+  }
+
+  function sendNotFound($code = 404, $msg = 'resource not found') {
+    $this->statusCode = $code;
+    $this->message = $msg;
+    return $this->sendData();
+  }
+
+  function sendSuccessfulPost($uriOrData = null, $code = 201, $msg = 'resource created succesfully') {
+    $this->statusCode = $code;
+    $this->message = $msg;
+    if (is_string($uriOrData)) {
+      $this->statusCode = 303;
+      return $this->redirect($uriOrData, $this->statusCode);
+    } else {
+      return $this->sendData($uriOrData);
+    }
   }
 
   function isValidApiSession() {

@@ -3,7 +3,7 @@
 class AuthSession extends DataObject {
 
   private static $db = array(
-    "UID" => "Varchar(32)",
+    "UID" => "Varchar(64)",
     "ValidUntilTimestamp" => "Int",
     "ValidUntil" => "SS_DateTime",
     "RequestedFromIP" => "Varchar(32)",
@@ -37,7 +37,7 @@ class AuthSession extends DataObject {
   }
 
   function URI() {
-    return Director::absoluteBaseURL()."auth/session/".$this->UID;
+    return Director::absoluteBaseURL()."auth/session/";//.(($withUID) ? $this->UID : '');
   }
 
   function setValidInMinutesFromNow($minutes = null) {

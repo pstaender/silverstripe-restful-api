@@ -4,7 +4,7 @@ class AuthController extends ApiController {
 
   private static $api_parameters = array(
     "GET:session" => array(
-      '$ID!' => "/^.{32,}$/",
+      '$ID' => "*",
     ),
     "DELETE:session" => array(
       '$ID!' => "*",
@@ -25,7 +25,8 @@ class AuthController extends ApiController {
 
   function session() {
     if ($this->request->isGET()) {
-      return $this->sendJSON($this->getSessionFromRequest());
+      $session = $this->getSessionFromRequest();
+      return ($session) ? $this->sendJSON($session) : $this->sendNotFound();
     } else if ($this->request->isPOST()) {
       $data = $this->request->data;
       $member = Member::get()->filter(array("Email" => $data->email))->First();
@@ -46,7 +47,7 @@ class AuthController extends ApiController {
         $session = new AuthSession();
         $session->MemberID = $member->ID;
         $session->write();
-        return $this->sendJSON($session);
+        return $this->sendSuccessfulPost($session);
       }
       return $this->sendError("Couldn't match password / email", 400);
     } else if ($this->request->isDELETE()) {
