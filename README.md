@@ -35,26 +35,58 @@ To avoid unnessary authentication **during development** you can define a `admin
 `POST:http://localhost/auth/session` with body:
 
 ```json
-  { "email": "you@email.com", "password": "yourpassword" }
+  {
+    "message":"resource deleted successfully"
+  }
 ```
 
-Returns s.th. like:
+Returns (with StatusCode 200):
 
-`{"data":{"accesstoken":"8d69f3f127a9ddc4f73d75c5803c846696bb10ff","valid_until":"Mon Sep 28 2015 03:01:06 +0200","valid_until_timestamp":1443402066,"user":{"id":2,"first_name":"Firstname","surname":"Surname","email":"you@email.com","password":"$2y$10$30a34abddf59ff219c035uWmfqMW1y39zOeY3Qi0e16emeFxRIiUm","remember_login_token":null,"num_visit":0,"last_visited":null,"auto_login_hash":null,"auto_login_expired":null,"password_encryption":"blowfish","salt":"10$30a34abddf59af219c0353","password_expiry":null,"locked_out_until":null,"locale":"en_US","failed_login_count":0,"date_format":"MMM d, y","time_format":"h:mm:ss a"},"uri":"http:\/\/localhost\/auth\/session\/"}}` (200)
+```json
+  {
+    "data":{
+      "accesstoken":"8d69f3f127a9ddc4f73d75c5803c846696bb10ff",
+      "valid_until":"Mon Sep 28 2015 03:01:06 +0200",
+      "valid_until_timestamp":1443402066,
+      "user":{
+        "id":2,
+        …
+      },
+      "uri":"http://localhost/auth/session/"
+    }
+  }
+```
 
 Now you can use the accesstoken to perform actions.
 
 #### Session info
 
-`GET:http://localhost/auth/session` with header `X-Accesstoken: 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` (you always have to attach the Accesstoken this way to get authenticated!) returns:
+`GET:http://localhost/auth/session` with header `X-Accesstoken: 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` (you always have to attach the Accesstoken this way to get authenticated!) returns (with StatusCode 200):
 
-`{"data":{"accesstoken":"8d69f3f127a9ddc4f73d75c5803c846696bb10ff","valid_until":"Mon Sep 28 2015 03:28:06 +0200","valid_until_timestamp":1443403686,"user":{"id":2,"first_name":"Philipp","surname":"St\u00e4nder","email":"philipp.staender@gmail.com","password":"$2y$10$30a34abddf59ff219c035uWmfqMW1y39zOtY3Qi0e16emeFxRIiUm","remember_login_token":null,"num_visit":0,"last_visited":null,"auto_login_hash":null,"auto_login_expired":null,"password_encryption":"blowfish","salt":"10$30a34abddf59ff219c0353","password_expiry":null,"locked_out_until":null,"locale":"en_US","failed_login_count":0,"date_format":"MMM d, y","time_format":"h:mm:ss a"},"uri":"http:\/\/localhost\/auth\/session\/"}}` (200)
+```json
+  {
+    "data":{
+      "accesstoken":"8d69f3f127a9ddc4f73d75c5803c846696bb10ff",
+      "valid_until":"Mon Sep 28 2015 03:28:06 +0200",
+      "valid_until_timestamp":1443403686,
+      "user":{
+        "id":2,
+        …
+      },
+      "uri":"http://localhost/auth/session/"
+    }
+  }
+```
 
 ### Logout (delete Session)
 
-`DELETE:http://localhost/auth/session/8d69f3f127a9ddc4f73d75c5803c846696bb10ff` with header `X-Accesstoken: 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` return:
+`DELETE:http://localhost/auth/session/8d69f3f127a9ddc4f73d75c5803c846696bb10ff` with header `X-Accesstoken: 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` returns (with StatusCode 202):
 
-`{"message":"resource deleted successfully"}` (202)
+```json
+  {
+    "message":"resource deleted successfully"
+  }
+```
 
 ## Interesting Controller helpers:
 
