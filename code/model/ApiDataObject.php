@@ -46,14 +46,17 @@ class ApiDataObject extends DataExtension {
    * @return string | null      Name of the original field in CamelCase
    */
   static function real_field_name($field, $ownerClass) {
+    if (is_string($ownerClass)) {
+      $ownerClass = singleton($ownerClass);
+    }
     if (preg_match("/^[a-z\_0-9]+$/", $field)) {
       foreach($ownerClass->inheritedDatabaseFields() as $fieldName => $type) {
         if (strtolower($fieldName)===str_replace('_', '', $field))
           return $fieldName;
       }
+    } else {
+      return $field;
     }
-    // else
-    return null;
   }
 
 

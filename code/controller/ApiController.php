@@ -73,6 +73,20 @@ class ApiController extends Controller {
     return (is_array($data)) ? new ArrayData($data) : null;
   }
 
+  protected function requestDataAsArray($className) {
+    $data = $this->requestBodyAsArray();
+    $d = array();
+    foreach($data as $key => $value) {
+      $d[ApiDataObject::real_field_name($key, $className)] = $value;
+    }
+    return $d;
+  }
+
+  protected function requestDataAsDataObject($className) {
+    $data = $this->requestDataAsArray();
+    return (is_array($data)) ? new ArrayData($data) : null;
+  }
+
   function handleAction($request, $action) {
     $method = $request->httpMethod(); // POST|GET|PUT…
     $allParams = $request->allParams(); // from roter
@@ -87,6 +101,26 @@ class ApiController extends Controller {
     // parse json
     if (preg_match('/json$/',$contentType)) {
       $data = json_decode($body, true);
+      if (!$data) {
+        $msg = null;
+        switch(json_last_error()) {
+          case JSON_ERROR_DEPTH:
+           $msg = 'reached max. stack depth';
+          break;
+          case JSON_ERROR_CTRL_CHAR:
+           $msg = 'unexpected control character';
+          break;
+          case JSON_ERROR_SYNTAX:
+           $msg = 'syntax error in JSON';
+          // break;
+          // case JSON_ERROR_NONE:
+          //  $msg = null;
+          break;
+        }
+        if ($msg) {
+          return $this->sendError(400, "JSON Parser Error ($msg)");
+        }
+      }
     }
     $underscoreFields = $this->config()->get('underscoreFields');
 
@@ -278,6 +312,22 @@ class ApiController extends Controller {
     return $api;
   }
 
+  private function sortCodeAndMessage($code, $message) {
+    if (is_int($message)) {
+      $a = $code;
+      $code = $message;
+      $message = $a;
+    } else if (is_string($code)) {
+      $a = $message;
+      $message = $code;
+      $code = (is_int($a)) ? $a : null;
+    }
+    return array(
+      "message" => $message,
+      "code" => $code,
+    );
+  }
+
   function sendData($data = null, $code = null) {
     $apiData = $this->prepareApiData($data);
     if ($code) $this->code = $code;
@@ -291,33 +341,38 @@ class ApiController extends Controller {
     return $this->sendData($data, $code);
   }
 
-  function sendError($errMsg, $errCode = 500) {
-    $this->error = $errMsg;
-    $this->code = $errCode;
+  function sendError($errMsg = 'unspecified error', $errCode = 500) {
+    $args = $this->sortCodeAndMessage($errMsg, $errCode);
+    $this->error = $args['message'];
+    $this->code  = $args['code'];
     return $this->sendData();
   }
 
   function sendSuccessfulPut($code = 201, $msg = 'resource updated successfully') {
-    $this->statusCode = $code;
-    $this->message = $msg;
+    $args = $this->sortCodeAndMessage($code, $msg);
+    $this->statusCode = $args['code'];
+    $this->message = $args['message'];
     return $this->sendData();
   }
 
   function sendSuccessfulDelete($code = 202, $msg = 'resource deleted successfully') {
-    $this->statusCode = $code;
-    $this->message = $msg;
+    $args = $this->sortCodeAndMessage($code, $msg);
+    $this->statusCode = $args['code'];
+    $this->message = $args['message'];
     return $this->sendData();
   }
 
   function sendNotFound($code = 404, $msg = 'resource not found') {
-    $this->statusCode = $code;
-    $this->message = $msg;
+    $args = $this->sortCodeAndMessage($code, $msg);
+    $this->statusCode = $args['code'];
+    $this->message = $args['message'];
     return $this->sendData();
   }
 
   function sendSuccessfulPost($uriOrData = null, $code = 201, $msg = 'resource created succesfully') {
-    $this->statusCode = $code;
-    $this->message = $msg;
+    $args = $this->sortCodeAndMessage($code, $msg);
+    $this->statusCode = $args['code'];
+    $this->message = $args['message'];
     if (is_string($uriOrData)) {
       $this->statusCode = 303;
       return $this->redirect($uriOrData, $this->statusCode);
