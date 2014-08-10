@@ -110,6 +110,7 @@ Now you can use the accesstoken to perform actions.
   * **sendSuccessfulPost($uriOrData = null, $code = 201, $msg = 'resource created succesfully')**
     - Helper to redirect to new resource (if $uriOrData is a string) or send a default "Resource created successfully" message after a `POST`
 
+
 ### CRUD
 
 ### Licence
