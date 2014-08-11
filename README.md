@@ -113,6 +113,12 @@ Now you can use the accesstoken to perform actions.
 
 ### CRUD
 
+### Tests
+
+```sh
+  $ sake dev/tests/ApiDataObjectTest flush=1
+```
+
 ### Licence
 
 MIT License

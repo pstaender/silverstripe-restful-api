@@ -49,10 +49,22 @@ class ApiDataObject extends DataExtension {
     if (is_string($ownerClass)) {
       $ownerClass = singleton($ownerClass);
     }
+    $fieldnameWithoutUnderscore = str_replace('_', '', $field);
     if (preg_match("/^[a-z\_0-9]+$/", $field)) {
       foreach($ownerClass->inheritedDatabaseFields() as $fieldName => $type) {
-        if (strtolower($fieldName)===str_replace('_', '', $field))
+        if (strtolower($fieldName)===$fieldnameWithoutUnderscore)
           return $fieldName;
+      }
+      $specialFields = array(
+        "id" => "ID",
+        "class_name" => "ClassName",
+        "created" => "Created",
+        "last_edited" => "LastEdited",
+      );
+      foreach($specialFields as $underscore => $camelCase) {
+        if ($field === $underscore) {
+          return $camelCase;
+        }
       }
     } else {
       return $field;
@@ -61,10 +73,10 @@ class ApiDataObject extends DataExtension {
 
 
   function forApi($options = null) {
-    $jsonDateFormat = $this->owner->config()->get('jsonDateFormat');//ApiController::config()->jsonDateFormat;
-    $underscoreFields = $this->owner->config()->get('underscoreFields');//ApiController::config()->underscoreFields;
+    $jsonDateFormat = $this->owner->config()->get('jsonDateFormat');
+    $underscoreFields = $this->owner->config()->get('underscoreFields');
     $castDataObjectFields = $this->owner->config()->get('castDataObjectFields');
-    $databaseFields = DataObject::database_fields($this->owner->class);//$this->owner->inheritedDatabaseFields();
+    $databaseFields = DataObject::database_fields($this->owner->class);
     $apiFields = (isset($options['fields'])) ? $options['fields'] : $this->inheritedApiFields();
     if (!is_array($apiFields)) {
       // use inherited database fields

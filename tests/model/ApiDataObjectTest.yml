@@ -1,0 +1,26 @@
+Permission:
+   admin:
+      Code: ADMIN
+   api-access:
+      Code: API_ACCESS
+Group:
+   admingroup:
+      Title: Admin
+      Code: admin
+      Permissions: =>Permission.admin
+   api:
+      Title: apigroup
+      Code: apigroup
+      Permissions: =>Permission.api-access
+Member:
+   admin:
+     FirstName: Admin
+     Email: admin@silverstripe.com
+     Groups: =>Group.admingroup
+   api:
+     FirstName: Api
+     Surname: User
+     Email: api@silverstripe.com
+     Groups: =>Group.api
+    Password: 1nitialPassword
+    PasswordExpiry: 2030-01-01
