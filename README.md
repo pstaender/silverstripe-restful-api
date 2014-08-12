@@ -116,7 +116,27 @@ Now you can use the accesstoken to perform actions.
 ### Tests
 
 ```sh
-  $ sake dev/tests/ApiDataObjectTest flush=1
+  $ sake dev/tests/module/silverstripe-restful-api flush=1
+```
+
+or
+
+```sh
+  $ sake /dev/tests/AuthControllerTest
+```
+
+to run specific tests.
+
+### Increase performance
+
+By deactivating blocking sessions, you can increase the response time.
+
+Beware that none across request session will work anymore because persistent session storage is deactivated in that scenario (not needed in pure restful services anyway).
+
+To activate this feature, add to your `_config.php`:
+
+```php
+  define('RESTFUL_API_MODULE_NON_BLOCKING_SESSION', true);
 ```
 
 ### Licence

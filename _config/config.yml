@@ -9,6 +9,7 @@ AuthSession:
   adminAccessToken: null
   requiredGroup: null
   requiredPermission: null
+  urlSegment: 'auth'
 DataObject:
   jsonDateFormat: 'D M d Y H:i:s O'
   underscoreFields: true

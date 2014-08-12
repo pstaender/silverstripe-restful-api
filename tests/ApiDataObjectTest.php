@@ -11,28 +11,7 @@ class ApiDataObjectTest extends SapphireTest {
       * with the `correct` parameters
       */
     function testExpectedDefaultConfigValues() {
-      $expectedConfig = [
-        "ApiController" => [
-          "underscoreFields" => true,
-          "useAccesstokenAuth" => true,
-        ],
-        "AuthSession" => [
-          "validInMinutesFromNow" => 10080,
-          "adminAccessToken" => null,
-          "requiredGroup" => null,
-          "requiredPermission" => null,
-        ],
-        "DataObject" => [
-          "jsonDateFormat" => 'D M d Y H:i:s O',
-          "underscoreFields" => true,
-          "castDataObjectFields" => true,
-        ],
-      ];
-      foreach($expectedConfig as $className => $fields) {
-        foreach($fields as $property => $value) {
-          $this->assertEquals($value, Config::inst()->get($className, $property));
-        }
-      }
+      ApiControllerTest::ensure_correct_config($this);
     }
 
     function testRealFieldNameMapping() {
@@ -46,6 +25,7 @@ class ApiDataObjectTest extends SapphireTest {
       ];
       foreach($map as $input => $expected) {
         $this->assertEquals($expected, ApiDataObject::real_field_name($input, 'Member'));
+        $this->assertEquals($expected, ApiDataObject::real_field_name($input, new Member()));
       }
     }
 
@@ -67,12 +47,38 @@ class ApiDataObjectTest extends SapphireTest {
         $expectedData = [
           'first_name' => 'Api',
           'surname' => 'User',
+          'class_name' => 'Member',
         ];
         $obj = $this->objFromFixture('Member', 'api');
         $apiData = $obj->forApi();
         foreach($expectedData as $field => $value) {
           $this->assertEquals($value, $apiData[$field]);
         }
+    }
+
+    function testPopulateWithArrayData() {
+      $data = [
+        "FirstName" => "Philipp",
+        "Email" => "philipp@home.com",
+        "ID" => 123,
+      ];
+      $member = $this->objFromFixture('Member', 'api');
+      $member->populateWithArrayData($data);
+      foreach($data as $field => $exptectedValue) {
+        $this->assertEquals($exptectedValue, $member->{$field});
+      }
+      // we also ensure that we can work with underscore field names
+      $underscoreData = [
+        "first_name" => "Philipp",
+        "email" => "philipp@home.com",
+        "id" => 123,
+      ];
+      $member = $this->objFromFixture('Member', 'api');
+      $member->populateWithArrayData($underscoreData);
+      foreach($data as $field => $exptectedValue) {
+        $field = ApiDataObject::real_field_name($field, $member);
+        $this->assertEquals($exptectedValue, $member->{$field});
+      }
     }
 
     // TODO: populateWithData, populateWithArrayData, inheritedApiFields

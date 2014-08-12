@@ -37,7 +37,7 @@ class AuthSession extends DataObject {
   }
 
   function URI() {
-    return Director::absoluteBaseURL()."auth/session/";//.(($withUID) ? $this->UID : '');
+    return Director::absoluteBaseURL().$this->config()->get('urlSegment')."/session/";
   }
 
   function setValidInMinutesFromNow($minutes = null) {

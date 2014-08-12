@@ -17,7 +17,7 @@ class ApiDataObject extends DataExtension {
    * Copied from @DataOject->inheritedDatabaseFields()
    * @return array fields
    */
-  private function inheritedApiFields() {
+  function inheritedApiFields() {
     $fields     = array();
     $currentObj = $this->owner->class;
 
@@ -26,6 +26,9 @@ class ApiDataObject extends DataExtension {
       if ($apiFields === null) {
         $apiFields = $this->owner->stat('db');
         $fields['ID'] = 'ID'; // we have to add manually 'ID'
+        $fields['ClassName'] = 'ClassName';
+        $fields['Created'] = 'Created';
+        $fields['LastEdited'] = 'LastEdited';
         foreach ($apiFields as $field => $type) {
           $fields[$field] = $field;
         }
@@ -47,24 +50,13 @@ class ApiDataObject extends DataExtension {
    */
   static function real_field_name($field, $ownerClass) {
     if (is_string($ownerClass)) {
-      $ownerClass = singleton($ownerClass);
+      $ownerClass = Injector::inst()->create($ownerClass);//singleton($ownerClass);
     }
     $fieldnameWithoutUnderscore = str_replace('_', '', $field);
     if (preg_match("/^[a-z\_0-9]+$/", $field)) {
-      foreach($ownerClass->inheritedDatabaseFields() as $fieldName => $type) {
+      foreach($ownerClass->inheritedApiFields() as $fieldName => $type) {
         if (strtolower($fieldName)===$fieldnameWithoutUnderscore)
           return $fieldName;
-      }
-      $specialFields = array(
-        "id" => "ID",
-        "class_name" => "ClassName",
-        "created" => "Created",
-        "last_edited" => "LastEdited",
-      );
-      foreach($specialFields as $underscore => $camelCase) {
-        if ($field === $underscore) {
-          return $camelCase;
-        }
       }
     } else {
       return $field;
@@ -146,7 +138,7 @@ class ApiDataObject extends DataExtension {
     return $this->populateWithArrayData($data, $only);
   }
 
-  function populateWithArrayData(array $data, $only = null) {
+  function populateWithArrayData(array $data, $only = null/*, $exclude = ["ID"]*/) {
     $hasOnlyFilter = is_array($only);
     foreach($data as $key => $value) {
       $field = ApiDataObject::real_field_name($key, $this->owner);
