@@ -4,6 +4,9 @@ Name: RestfulApiConfig
 ApiController:
   underscoreFields: true
   useAccesstokenAuth: true
+  accessTokenPropertyName: 'X-Accesstoken'
+  configValuePropertyName: 'X-Config-'
+  allowOverrideConfiguration: false
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null
@@ -16,3 +19,11 @@ DataObject:
   castDataObjectFields: true
   extensions:
     - ApiDataObject
+---
+Except:
+  environment: 'live'
+---
+ApiController:
+  allowOverrideConfiguration: true
+AuthSession:
+  adminAccessToken: 84c44b7ee63a9919aa272673eecfc7f9b7424e47

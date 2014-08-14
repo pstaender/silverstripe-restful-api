@@ -10,26 +10,44 @@ class ApiController extends Controller {
   protected $help = null;
   protected $format = 'json';
   protected $parameters = null;
+  protected $apiSession = null;
 
   function init() {
     parent::init();
     // We extend the request object with the properties `data` and `session`
     $this->request->data = $this->requestBodyAsDataObject();
+    if ($this->config()->get('allowOverrideConfiguration')) {
+      $this->applyConfigDataFromHeader();
+    }
     if ($this->config()->get('useAccesstokenAuth')) {
-      $this->request->session = $this->getSessionFromRequest();
-      $this->useApiAccesstokenForSession();
+      $this->apiSession = $this->getSessionFromRequest();
+      $this->setSessionByApiSession();
     }
   }
 
   function getAccessTokenFromRequest() {
-    $accesstoken = $this->request->getHeader('X-Accesstoken');
+    $accesstoken = $this->request->getHeader($this->config()->get('accessTokenPropertyName'));
     if (!$accesstoken)
       $accesstoken = (string) (isset($data['accesstoken'])) ? $data['accesstoken'] : ((isset($_REQUEST['accesstoken'])) ? $_REQUEST['accesstoken'] : null );
     return $accesstoken;
   }
 
   function getSessionFromRequest() {
-    return AuthSession::get_by_authtoken($this->getAccessTokenFromRequest());
+    $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
+    $accessToken = $this->getAccessTokenFromRequest();
+    if (($adminAccessToken) && ($adminAccessToken === $accessToken)) {
+      return AuthSession::get_admin_session_by_accesstoken($adminAccessToken);
+    }
+    return AuthSession::get_by_accesstoken($accessToken);
+  }
+
+
+  function applyConfigDataFromHeader() {
+    foreach($this->request->getHeaders() as $property => $value) {
+      if (preg_match("/^".$this->config()->get('configValuePropertyName')."[a-zA-Z]+/",$property)) {
+        echo $property.": ".$value."\n";
+      }
+    }
   }
 
   /**
@@ -37,30 +55,14 @@ class ApiController extends Controller {
    * By default SilverStripe using a form + session stored auth process,
    * but with stateless restful we actually don't need request outlasting sessions
    * (only for SilverStripe specifics mechanims, like Permission::check() etc.)
-   * @param  boolean $setSession Should be always true, because that's what it's all about
-   * @return int                 ID of the "logged in" member
+   * @return int                  ID of the "logged in" member
    */
-  function useApiAccesstokenForSession($setSession = true) {
-    $data = $this->request->data;
-    $accesstoken = $this->getAccessTokenFromRequest();
-    $member = null;
-    if ($accesstoken) {
-
-      $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
-      $session = $this->request->session;
-
-      if ($session) {
-        $member = $session->Member();
-      } elseif (($adminAccessToken) && ($accesstoken === (string) $adminAccessToken)) {
-        // if we have an fixed accesstoken defined in config and this one is used, load default admin
-        // this mode is reserved for development or testing only!
-        $member = Permission::get_members_by_permission('ADMIN')->First();
-      }
-    }
-    $id = ($member) ? $member->ID : null;
-    if ($setSession) {
+  private function setSessionByApiSession() {
+    $id = (($this->apiSession)&&($this->apiSession->Member)) ? $this->apiSession->Member->ID : null;
+    if ($id)
       Session::set("loggedInAs", $id);
-    }
+    else
+      Session::clear('loggedInAs');
     return $id;
   }
 
@@ -89,7 +91,7 @@ class ApiController extends Controller {
 
   function handleAction($request, $action) {
     $method = $request->httpMethod(); // POST|GET|PUT…
-    $allParams = $request->allParams(); // from roter
+    $allParams = $request->allParams(); // from router
     $extension = $request->getExtension(); // .html
     $requestVars = $request->requestVars(); // POST + GET
     $getVars = $request->getVars();
@@ -138,7 +140,7 @@ class ApiController extends Controller {
     }
 
     if(!$this->hasAction($actualAction)) {
-      return $this->sendError("Action `$actualAction` isn't available on `$this->class`", 404);
+      return $this->sendError("Action `$actualAction` isn't available on API class `$this->class`", 404);
     }
     if(!$this->checkAccessAction($action) || in_array(strtolower($action), array('run', 'init'))) {
       return $this->sendError("No permission to access `$action` ($actualAction) on `$this->class`", 403);
@@ -157,10 +159,13 @@ class ApiController extends Controller {
           $isURLParameter = ($field[0] === '$') ? true : false;
           $field = preg_replace('/^(\?|\$)*(.*?)(\!)*$/', "$2", $field);
           $camelCaseFieldName = null;
-          if ($underscoreFields) {
-            $camelCaseFieldName = $field;
-            $field = ApiDataObject::to_underscore($field);
-          }
+          // if (preg_match("/^[a-z\_]$/",$field)) {
+          //   return user_error("Field identifier `$field` in \$api_fields has to be CamelCase to work correctly.");
+          // }
+          // if (($underscoreFields) && (preg_match("/^[A-Z]$/",$field))) {
+          //   $camelCaseFieldName = $field;
+          //   $field = ApiDataObject::to_underscore($field);
+          // }
           if ($isQueryParameter) {
             $value = (isset($requestVars[$field])) ? $requestVars[$field] : null;
             if ((!$value)&&($field !== $camelCaseFieldName)) {
@@ -382,8 +387,8 @@ class ApiController extends Controller {
   }
 
   function isValidApiSession() {
-    if ($this->request->session) {
-      return $this->request->session->IsValid();
+    if ($this->apiSession) {
+      return $this->apiSession->IsValid();
     }
     return false;
   }

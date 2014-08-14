@@ -6,21 +6,27 @@ class ApiControllerTest extends SapphireTest {
    * Some static helpers for api specific requests and data tramsforming
    */
 
-  static function request($method, $url, array $data, $accessToken = null) {
-    $body = json_encode($data);
+  static function request($method, $url, $data = null, $accessToken = null) {
+    $body = null;
+    if (is_array($data)) {
+      $body = json_encode($data);
+      if (!$body) {
+        user_error('Could not encode json from $data');
+      }
+    }
     $headers = [
       "Content-Type" => "application/json",
     ];
     if ($accessToken) {
-      $headers['X-Accesstoken'] = $accesstoken;
+      $headers['X-Accesstoken'] = $accessToken;
     }
-    return Director::test('auth/session', $postVars = null, $session = null, $httpMethod = $method, $body, $headers);
+    return Director::test($url, $postVars = null, $session = null, $httpMethod = $method, $body, $headers);
   }
 
   static function extract_code_and_data_from_response($resp) {
     $data = json_decode($resp->getBody(), true);
     if (!$data) {
-      user_error('Could not parse JSON from body `'.$resp->body.'`');
+      user_error('Could not parse JSON from body `'.$resp->getBody().'`');
     }
     return [
       "statusCode" => $resp->getStatusCode(),
@@ -28,7 +34,7 @@ class ApiControllerTest extends SapphireTest {
     ];
   }
 
-  static function test($method, $url, array $data, $accessToken = null) {
+  static function test($method, $url, $data = null, $accessToken = null) {
     return self::extract_code_and_data_from_response(self::request($method, $url, $data, $accessToken));
   }
 
@@ -37,10 +43,13 @@ class ApiControllerTest extends SapphireTest {
       "ApiController" => [
         "underscoreFields" => true,
         "useAccesstokenAuth" => true,
+        "accessTokenPropertyName" => 'X-Accesstoken',
+        "configValuePropertyName" => 'X-Config-',
+        "allowOverrideConfiguration" => true,
       ],
       "AuthSession" => [
         "validInMinutesFromNow" => 10080,
-        "adminAccessToken" => null,
+        "adminAccessToken" => "84c44b7ee63a9919aa272673eecfc7f9b7424e47",
         "requiredGroup" => null,
         "requiredPermission" => null,
         "urlSegment" => 'auth',

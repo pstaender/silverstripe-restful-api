@@ -12,21 +12,22 @@ class AuthController extends ApiController {
     "POST:session" => array(
       "email!" => "*",
       "password!" => "*",
-    ),
+    )
   );
 
   private static $api_allowed_actions = array(
-    "POST:session" => true,
-    "GET:session" => true,
-    "DELETE:session" =>true,
-    "GET:sessions" => true,
+    "POST:session"    => true,
+    "GET:session"     => true,
+    "DELETE:session"  => true,
+    "GET:sessions"    => true,
     "DELETE:sessions" => true,
+    "GET:permission"  => true,//'->isValidApiSession',
   );
 
   function session() {
     if ($this->request->isGET()) {
       $session = $this->getSessionFromRequest();
-      return ($session) ? $this->sendJSON($session) : $this->sendNotFound();
+      return ($session) ? $this->sendData($session) : $this->sendNotFound();
     } else if ($this->request->isPOST()) {
       $data = $this->request->data;
       $member = Member::get()->filter(array("Email" => $data->email))->First();
@@ -51,7 +52,7 @@ class AuthController extends ApiController {
       }
       return $this->sendError("Couldn't match password / email", 400);
     } else if ($this->request->isDELETE()) {
-      if ($session = $this->request->session) {
+      if ($session = $this->apiSession) {
         $session->delete();
         return $this->sendSuccessfulDelete();
       } else {
@@ -64,13 +65,27 @@ class AuthController extends ApiController {
     if (!$this->isValidApiSession())
       return $this->sendInvalidApiSession();
     if ($this->request->isGET()) {
-      return $this->sendJSON(array(
-        "count" => AuthSession::get()->filter(array("MemberID" => $this->request->session->MemberID))->Count()
+      return $this->sendData(array(
+        "count" => AuthSession::get()->filter(array("MemberID" => $this->apiSession->Member))->Count()
       ));
     } else if ($this->request->isDELETE()) {
-      AuthSession::get()->filter(array("MemberID" => $this->request->session->MemberID))->removeAll();
+      AuthSession::get()->filter(array("MemberID" => $this->apiSession->MemberID))->removeAll();
       return $this->sendSuccessfulDelete();
     }
+  }
+
+  function permission() {
+    return null;
+  }
+
+  function permissionGET() {
+    $code = $this->request->param("ID");
+    return $this->sendData(array(
+      "permission" => array(
+        "code" => $code,
+        "granted" => Permission::check($code),
+      ),
+    ));
   }
 
 }

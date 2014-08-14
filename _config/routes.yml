@@ -1,7 +1,7 @@
 ---
 Name: restfulapiroutes
 After:
-  - '#coreroutes'
+  - '#rootroutes'
 ---
 Director:
   rules:

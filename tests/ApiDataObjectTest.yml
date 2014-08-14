@@ -16,6 +16,7 @@ Member:
    admin:
      FirstName: Admin
      Email: admin@silverstripe.com
+     Password: password
      Groups: =>Group.admingroup
    api:
      FirstName: Api

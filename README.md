@@ -11,11 +11,13 @@ Name: RestfulApiConfig
 ApiController:
   underscoreFields: true
   useAccesstokenAuth: true
+  accessTokenPropertyName: 'X-Accesstoken'
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null
   requiredGroup: null
   requiredPermission: null
+  urlSegment: 'auth'
 DataObject:
   jsonDateFormat: 'D M d Y H:i:s O'
   underscoreFields: true
@@ -126,6 +128,8 @@ or
 ```
 
 to run specific tests.
+
+Ensure that you have defined [$_FILE_TO_URL_MAPPING](http://doc.silverstripe.org/framework/en/topics/commandline) in `_ss_environment.php` to run controller tests correctly (otherwise redirects will throw an user error for instance).
 
 ### Increase performance
 
