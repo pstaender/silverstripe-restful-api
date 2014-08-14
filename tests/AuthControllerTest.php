@@ -67,8 +67,20 @@ class AuthControllerTest extends SapphireTest {
       // TODO: test validuntil!
     }
 
-    function testOverrideConfigValuesInHeader() {
-
+    function testPermissionForSession() {
+      $data = [
+        "email" => "admin@silverstripe.com",
+        "password" => "password",
+      ];
+      // create session
+      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $accessToken = $res['data']['data']['accesstoken'];
+      // check session exists (redundant test segment, but ensures that test succeeded until here)
+      $res = ApiControllerTest::test('GET', 'auth/session/', null, $accessToken);
+      $this->assertEquals(200, $res['statusCode']);
+      $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', null, $accessToken);
+      $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
+      $this->assertEquals(true, $res['data']['data']['permission']['granted']);
     }
 
     function testAdminAccessToken() {
@@ -91,6 +103,5 @@ class AuthControllerTest extends SapphireTest {
       $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
       $this->assertEquals(true, $res['data']['data']['permission']['granted']);
     }
-
 
 }

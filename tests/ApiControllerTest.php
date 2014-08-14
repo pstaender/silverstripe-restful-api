@@ -44,7 +44,6 @@ class ApiControllerTest extends SapphireTest {
         "underscoreFields" => true,
         "useAccesstokenAuth" => true,
         "accessTokenPropertyName" => 'X-Accesstoken',
-        "configValuePropertyName" => 'X-Config-',
         "allowOverrideConfiguration" => true,
       ],
       "AuthSession" => [

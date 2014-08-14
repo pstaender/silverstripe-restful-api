@@ -44,7 +44,9 @@ class AuthSession extends DataObject {
     }
     if ((!$session->Member()) || (!$session->Member()->inGroup('ADMIN'))) {
       // we need to attach an admin user to session to fulfill a valid session datao object with admin privileges
-      $session->Member = Permission::get_members_by_permission('ADMIN')->First();
+      $admin = Permission::get_members_by_permission('ADMIN')->First();
+      $session->Member = $admin;
+      $session->MemberID = $admin->ID;
       $session->write();
     }
     if (!$session->isValid()) {

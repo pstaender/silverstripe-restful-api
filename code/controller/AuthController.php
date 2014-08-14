@@ -27,6 +27,8 @@ class AuthController extends ApiController {
   function session() {
     if ($this->request->isGET()) {
       $session = $this->getSessionFromRequest();
+      $this->apiSession = $session;
+      $this->setSessionByApiSession();
       return ($session) ? $this->sendData($session) : $this->sendNotFound();
     } else if ($this->request->isPOST()) {
       $data = $this->request->data;
@@ -46,6 +48,7 @@ class AuthController extends ApiController {
           }
         }
         $session = new AuthSession();
+        $session->Member = $member;
         $session->MemberID = $member->ID;
         $session->write();
         return $this->sendSuccessfulPost($session);
@@ -66,20 +69,28 @@ class AuthController extends ApiController {
       return $this->sendInvalidApiSession();
     if ($this->request->isGET()) {
       return $this->sendData(array(
-        "count" => AuthSession::get()->filter(array("MemberID" => $this->apiSession->Member))->Count()
+        "count" => AuthSession::get()->filter(array(
+          "MemberID" => $this->apiSession->Member()->ID
+        ))->Count()
       ));
     } else if ($this->request->isDELETE()) {
-      AuthSession::get()->filter(array("MemberID" => $this->apiSession->MemberID))->removeAll();
+      AuthSession::get()->filter(array(
+        "MemberID" => $this->apiSession->Member()->ID
+      ))->removeAll();
       return $this->sendSuccessfulDelete();
     }
   }
 
   function permission() {
+    // will be handled by permissionGET
+    // but the method is needed for the framework to check the called action
+    // TODO: get rid of this workaround
     return null;
   }
 
   function permissionGET() {
     $code = $this->request->param("ID");
+    // echo "..".Member::currentUserID()."!!".Permission::check($code)."::";
     return $this->sendData(array(
       "permission" => array(
         "code" => $code,

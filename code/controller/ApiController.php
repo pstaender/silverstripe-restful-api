@@ -16,11 +16,9 @@ class ApiController extends Controller {
     parent::init();
     // We extend the request object with the properties `data` and `session`
     $this->request->data = $this->requestBodyAsDataObject();
-    if ($this->config()->get('allowOverrideConfiguration')) {
-      $this->applyConfigDataFromHeader();
-    }
     if ($this->config()->get('useAccesstokenAuth')) {
       $this->apiSession = $this->getSessionFromRequest();
+      // echo Debug::show($this->apiSession);
       $this->setSessionByApiSession();
     }
   }
@@ -41,15 +39,6 @@ class ApiController extends Controller {
     return AuthSession::get_by_accesstoken($accessToken);
   }
 
-
-  function applyConfigDataFromHeader() {
-    foreach($this->request->getHeaders() as $property => $value) {
-      if (preg_match("/^".$this->config()->get('configValuePropertyName')."[a-zA-Z]+/",$property)) {
-        echo $property.": ".$value."\n";
-      }
-    }
-  }
-
   /**
    * Use the api accesstoken auth process to define a user session in SilverStripe
    * By default SilverStripe using a form + session stored auth process,
@@ -57,8 +46,8 @@ class ApiController extends Controller {
    * (only for SilverStripe specifics mechanims, like Permission::check() etc.)
    * @return int                  ID of the "logged in" member
    */
-  private function setSessionByApiSession() {
-    $id = (($this->apiSession)&&($this->apiSession->Member)) ? $this->apiSession->Member->ID : null;
+  protected function setSessionByApiSession() {
+    $id = (($this->apiSession)&&($this->apiSession->MemberID)) ? $this->apiSession->MemberID : 0;//(($this->apiSession)&&($this->apiSession->Member())) ? $this->apiSession->Member()->ID : null;
     if ($id)
       Session::set("loggedInAs", $id);
     else
