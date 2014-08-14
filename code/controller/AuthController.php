@@ -27,7 +27,7 @@ class AuthController extends ApiController {
   function session() {
     if ($this->request->isGET()) {
       $session = $this->getSessionFromRequest();
-      $this->apiSession = $session;
+      $this->restfulSession = $session;
       $this->setSessionByApiSession();
       return ($session) ? $this->sendData($session) : $this->sendNotFound();
     } else if ($this->request->isPOST()) {
@@ -55,7 +55,7 @@ class AuthController extends ApiController {
       }
       return $this->sendError("Couldn't match password / email", 400);
     } else if ($this->request->isDELETE()) {
-      if ($session = $this->apiSession) {
+      if ($session = $this->restfulSession) {
         $session->delete();
         return $this->sendSuccessfulDelete();
       } else {
@@ -70,12 +70,12 @@ class AuthController extends ApiController {
     if ($this->request->isGET()) {
       return $this->sendData(array(
         "count" => AuthSession::get()->filter(array(
-          "MemberID" => $this->apiSession->Member()->ID
+          "MemberID" => $this->restfulSession->Member()->ID
         ))->Count()
       ));
     } else if ($this->request->isDELETE()) {
       AuthSession::get()->filter(array(
-        "MemberID" => $this->apiSession->Member()->ID
+        "MemberID" => $this->restfulSession->Member()->ID
       ))->removeAll();
       return $this->sendSuccessfulDelete();
     }

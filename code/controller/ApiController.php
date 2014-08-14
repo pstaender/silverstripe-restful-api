@@ -10,15 +10,15 @@ class ApiController extends Controller {
   protected $help = null;
   protected $format = 'json';
   protected $parameters = null;
-  protected $apiSession = null;
+  protected $restfulSession = null;
 
   function init() {
     parent::init();
     // We extend the request object with the properties `data` and `session`
     $this->request->data = $this->requestBodyAsDataObject();
     if ($this->config()->get('useAccesstokenAuth')) {
-      $this->apiSession = $this->getSessionFromRequest();
-      // echo Debug::show($this->apiSession);
+      $this->restfulSession = $this->getSessionFromRequest();
+      // echo Debug::show($this->restfulSession);
       $this->setSessionByApiSession();
     }
   }
@@ -47,7 +47,7 @@ class ApiController extends Controller {
    * @return int                  ID of the "logged in" member
    */
   protected function setSessionByApiSession() {
-    $id = (($this->apiSession)&&($this->apiSession->MemberID)) ? $this->apiSession->MemberID : 0;//(($this->apiSession)&&($this->apiSession->Member())) ? $this->apiSession->Member()->ID : null;
+    $id = (($this->restfulSession)&&($this->restfulSession->MemberID)) ? $this->restfulSession->MemberID : 0;//(($this->restfulSession)&&($this->restfulSession->Member())) ? $this->restfulSession->Member()->ID : null;
     if ($id)
       Session::set("loggedInAs", $id);
     else
@@ -376,8 +376,8 @@ class ApiController extends Controller {
   }
 
   function isValidApiSession() {
-    if ($this->apiSession) {
-      return $this->apiSession->IsValid();
+    if ($this->restfulSession) {
+      return $this->restfulSession->IsValid();
     }
     return false;
   }
