@@ -104,4 +104,44 @@ class AuthControllerTest extends SapphireTest {
       $this->assertEquals(true, $res['data']['data']['permission']['granted']);
     }
 
+    function testRequiredFields() {
+      $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
+      $res = ApiControllerTest::test('GET', 'auth/permission/', null, $adminAccessToken);
+      $this->assertEquals("The URL parameter `ID` is required", $res['data']['error']);
+      $this->assertEquals(422, $res['data']['code']);
+    }
+
+    function testTypeOfFields() {
+      $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
+      $negativeTests = [
+          "integer" => [ 4.4, "abc", true, false ],
+          "float"   => [ "abc", true, false ],
+          "boolean" => [ 1, "abc", 0 ],
+      ];
+
+      $positiveTests = [
+          "integer" => [ -1, 0, 1 ],
+          "boolean" => [ true, false ],
+          "float"   => [ 0.1, -1.1, 1.1, 1, 1.0 ],
+      ];
+      foreach($negativeTests as $type => $values) {
+        foreach($values as $value) {
+          $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', [ $type => $value ], $adminAccessToken);
+          $this->assertEquals(422, $res['data']['code']);
+          $this->assertEquals(1, preg_match("/^The JSON property `$type` has to be a(n)* $type$/", trim($res['data']['error'])));
+        }
+      }
+      foreach($positiveTests as $type => $values) {
+        foreach($values as $value) {
+          $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', [ $type => $value ], $adminAccessToken);
+          $this->assertEquals(200, $res['statusCode']);
+        }
+      }
+      $res = ApiControllerTest::test('GET', 'auth/permission/2', [ $type => $value ], $adminAccessToken);
+      $this->assertEquals(422, $res['data']['code']);
+      $this->assertEquals("The URL parameter `ID` has to match the following pattern: `/^[a-zA-Z\_]+$/`", $res['data']['error']);
+      $res = ApiControllerTest::test('GET', 'auth/permission/abc_EEFG', [ $type => $value ], $adminAccessToken);
+      $this->assertEquals(200, $res['statusCode']);
+    }
+
 }

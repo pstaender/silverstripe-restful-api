@@ -12,6 +12,12 @@ class AuthController extends ApiController {
     "POST:session" => array(
       "email!" => "*",
       "password!" => "*",
+    ),
+    "GET:permission" => array(
+      '$ID!'    => "/^[a-zA-Z\_]+$/",
+      'integer' => 'int',     // only for tests (see AuthControllerTest->testTypeOfFields())
+      'float'   => 'float',   // "
+      'boolean' => 'boolean', // "
     )
   );
 
@@ -90,10 +96,9 @@ class AuthController extends ApiController {
 
   function permissionGET() {
     $code = $this->request->param("ID");
-    // echo "..".Member::currentUserID()."!!".Permission::check($code)."::";
     return $this->sendData(array(
       "permission" => array(
-        "code" => $code,
+        "code"    => $code,
         "granted" => Permission::check($code),
       ),
     ));

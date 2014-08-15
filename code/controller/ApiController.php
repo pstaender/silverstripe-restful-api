@@ -155,21 +155,25 @@ class ApiController extends Controller {
           //   $camelCaseFieldName = $field;
           //   $field = ApiDataObject::to_underscore($field);
           // }
+
           if ($isQueryParameter) {
-            $value = (isset($requestVars[$field])) ? $requestVars[$field] : null;
-            if ((!$value)&&($field !== $camelCaseFieldName)) {
-              $value = (isset($requestVars[$camelCaseFieldName])) ? $requestVars[$camelCaseFieldName] : null;
+            if (isset($requestVars[$field])) {
+              $value = $requestVars[$field];
+            } else if (($field !== $camelCaseFieldName) && (isset($requestVars[$camelCaseFieldName]))) {
+              $value = $requestVars[$camelCaseFieldName];
             }
           } else if ($isURLParameter) {
-            $value = (isset($allParams[$field])) ? $allParams[$field] : null;
             // routing uses camelcase as default, this is why we do a check here again
-            if ((!$value)&&($field !== $camelCaseFieldName)) {
-              $value = (isset($allParams[$camelCaseFieldName])) ? $allParams[$camelCaseFieldName] : null;
+            if (isset($allParams[$field])) {
+              $value = $allParams[$field];
+            } else if (($field !== $camelCaseFieldName) && (isset($allParams[$camelCaseFieldName]))) {
+              $value = $allParams[$camelCaseFieldName];
             }
           } else {
-            $value = (isset($data[$field])) ? $data[$field] : null;
-            if ((!$value)&&($field !== $camelCaseFieldName)) {
-              $value = (isset($data[$camelCaseFieldName])) ? $data[$camelCaseFieldName] : null;
+            if (isset($data[$field])) {
+              $value = $data[$field];
+            } else if (($field !== $camelCaseFieldName) && (isset($data[$camelCaseFieldName]))) {
+              $value = $data[$camelCaseFieldName];
             }
           }
           $parameterType = "JSON property";
@@ -184,6 +188,7 @@ class ApiController extends Controller {
           }
           $valueType = (strtolower($type));
           if ($value === null) {
+            // var_dump($data);
             // null is always an accepted value if field is not required
             // so if we have null, we skip the type check
           } else if (($type[0]==='/')&&($type[strlen($type)-1]==='/')) {
@@ -197,7 +202,7 @@ class ApiController extends Controller {
               return $this->sendError("The $parameterType `$field` has to be an integer", 422);
           } else if (($valueType==='float')||($valueType==='number')) {
             // float
-            if (!is_float($value))
+            if ((!is_int($value)) && (!is_float($value)))
               return $this->sendError("The $parameterType `$field` has to be a float", 422);
           } else if ($valueType==='boolean') {
             if (!is_bool($value))
