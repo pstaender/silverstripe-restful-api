@@ -347,21 +347,21 @@ class ApiController extends Controller {
     return $this->sendData();
   }
 
-  function sendSuccessfulPut($code = 201, $msg = 'resource updated successfully') {
+  function sendSuccessfulPut($msg = 'resource updated successfully', $code = 201) {
     $args = $this->sortCodeAndMessage($code, $msg);
     $this->statusCode = $args['code'];
     $this->message = $args['message'];
     return $this->sendData();
   }
 
-  function sendSuccessfulDelete($code = 202, $msg = 'resource deleted successfully') {
+  function sendSuccessfulDelete($msg = 'resource deleted successfully', $code = 202) {
     $args = $this->sortCodeAndMessage($code, $msg);
     $this->statusCode = $args['code'];
     $this->message = $args['message'];
     return $this->sendData();
   }
 
-  function sendNotFound($code = 404, $msg = 'resource not found') {
+  function sendNotFound($msg = 'resource not found', $code = 404) {
     $args = $this->sortCodeAndMessage($code, $msg);
     $this->statusCode = $args['code'];
     $this->message = $args['message'];
@@ -378,6 +378,10 @@ class ApiController extends Controller {
     } else {
       return $this->sendData($uriOrData);
     }
+  }
+
+  function sendPermissionFailure($msg = 'permission failure', $code = 401) {
+    return $this->sendError($msg, $code);
   }
 
   function isValidApiSession() {

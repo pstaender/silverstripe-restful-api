@@ -45,13 +45,13 @@ class AuthController extends ApiController {
         if ($requiredGroup = Config::inst()->get('AuthSession', 'requiredGroup')) {
           // check that user is in Group
           if (!$member->inGroup($requiredGroup)) {
-            return $this->sendError("Member is not in the required group `$requiredGroup`", 401);
+            return $this->sendPermissionFailure("Member is not in the required group `$requiredGroup`");
           }
         }
         if ($requiredPermission = Config::inst()->get('AuthSession', 'requiredPermission')) {
           // check that member has required permission
           if (!Permission::checkMember($member, $requiredPermission)) {
-            return $this->sendError("Member has no `$requiredPermission` permission", 401);
+            return $this->sendPermissionFailure("Member has no `$requiredPermission` permission");
           }
         }
         $session = new AuthSession();
@@ -66,7 +66,7 @@ class AuthController extends ApiController {
         $session->delete();
         return $this->sendSuccessfulDelete();
       } else {
-        return $this->sendError('No session could be detected', 404);
+        return $this->sendNotFound('No session could be detected');
       }
     }
   }

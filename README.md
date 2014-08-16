@@ -12,6 +12,7 @@ ApiController:
   underscoreFields: true
   useAccesstokenAuth: true
   accessTokenPropertyName: 'X-Accesstoken'
+  allowOverrideConfiguration: false
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null
