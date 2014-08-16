@@ -23,5 +23,14 @@ Member:
      Surname: User
      Email: api@silverstripe.com
      Groups: =>Group.api
-    Password: 1nitialPassword
-    PasswordExpiry: 2030-01-01
+     Password: 1nitialPassword
+     PasswordExpiry: 2030-01-01
+AuthSession:
+   expired:
+     UID: 2f0df45ccc569eb0627afb40e184559fa8657baa
+     ValidUntil: 1234
+     Member: =>Member.admin
+   valid:
+     UID: 3f0df45ccc569eb0627afb40e184559fa8657baa
+     ValidUntil: 7040551390
+     Member: =>Member.admin

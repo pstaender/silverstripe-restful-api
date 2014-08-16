@@ -15,11 +15,11 @@ class AuthControllerTest extends SapphireTest {
         "email" => "jdancm",
         "password" => "cklmncac",
       ];
-      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
       $this->assertEquals(400, $res['statusCode']);
       $this->assertEquals("Couldn't match password / email", $res['data']['error']);
       unset($data["password"]);
-      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
       $this->assertEquals(422, $res['statusCode']);
       $this->assertEquals("The JSON property `password` is required", $res['data']['error']);
     }
@@ -29,7 +29,7 @@ class AuthControllerTest extends SapphireTest {
         "email" => "admin@silverstripe.com",
         "password" => "password",
       ];
-      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
       $this->assertEquals(201, $res['statusCode']);
       $this->assertTrue(strlen($res['data']['data']['accesstoken'])>6);
     }
@@ -39,9 +39,9 @@ class AuthControllerTest extends SapphireTest {
         "email" => "admin@silverstripe.com",
         "password" => "password",
       ];
-      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
       $accessToken = $res['data']['data']['accesstoken'];
-      $res = ApiControllerTest::test('GET', 'auth/session', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/session', null, $accessToken);
       $this->assertEquals(200, $res['statusCode']);
       $this->assertEquals($accessToken, $res['data']['data']['accesstoken']);
       // TODO: test validuntil!
@@ -53,16 +53,16 @@ class AuthControllerTest extends SapphireTest {
         "password" => "password",
       ];
       // create session
-      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
       $accessToken = $res['data']['data']['accesstoken'];
       // check session exists (redundant test segment (post+get), but ensures that test succeeded until here)
-      $res = ApiControllerTest::test('GET', 'auth/session/', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
       $this->assertEquals(200, $res['statusCode']);
       // delete session (i.e. logout)
       $url = 'auth/session/'.$accessToken;
-      $res = ApiControllerTest::test('DELETE', $url, null, $accessToken);
+      $res = ApiControllerTest::send_test('DELETE', $url, null, $accessToken);
       $this->assertEquals(202, $res['statusCode']);
-      $res = ApiControllerTest::test('GET', 'auth/session/', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
       $this->assertEquals(404, $res['statusCode']);
       // TODO: test validuntil!
     }
@@ -73,12 +73,12 @@ class AuthControllerTest extends SapphireTest {
         "password" => "password",
       ];
       // create session
-      $res = ApiControllerTest::test('POST', 'auth/session', $data);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
       $accessToken = $res['data']['data']['accesstoken'];
       // check session exists (redundant test segment, but ensures that test succeeded until here)
-      $res = ApiControllerTest::test('GET', 'auth/session/', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
       $this->assertEquals(200, $res['statusCode']);
-      $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $accessToken);
       $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
       $this->assertEquals(true, $res['data']['data']['permission']['granted']);
     }
@@ -86,27 +86,27 @@ class AuthControllerTest extends SapphireTest {
     function testAdminAccessToken() {
       $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
       $accessToken = sha1('somerandomaccesstoken');
-      $res = ApiControllerTest::test('GET', 'auth/session/', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
       // we expect neither to find a session
       $this->assertEquals(404, $res['statusCode']);
-      $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', null, $accessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $accessToken);
       // neither to have any admin privileges
       $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
       $this->assertEquals(false, $res['data']['data']['permission']['granted']);
       // but we should have both with ad admin access token:
       // a valid session
-      $res = ApiControllerTest::test('GET', 'auth/session/', null, $adminAccessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $adminAccessToken);
       $this->assertEquals($adminAccessToken, $res['data']['data']['accesstoken']);
       $this->assertTrue($res['data']['data']['is_valid']);
       // and admin permission(s)
-      $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', null, $adminAccessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $adminAccessToken);
       $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
       $this->assertEquals(true, $res['data']['data']['permission']['granted']);
     }
 
     function testRequiredFields() {
       $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
-      $res = ApiControllerTest::test('GET', 'auth/permission/', null, $adminAccessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/', null, $adminAccessToken);
       $this->assertEquals("The URL parameter `ID` is required", $res['data']['error']);
       $this->assertEquals(422, $res['data']['code']);
     }
@@ -126,22 +126,33 @@ class AuthControllerTest extends SapphireTest {
       ];
       foreach($negativeTests as $type => $values) {
         foreach($values as $value) {
-          $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', [ $type => $value ], $adminAccessToken);
+          $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', [ $type => $value ], $adminAccessToken);
           $this->assertEquals(422, $res['data']['code']);
+          $this->assertEquals(422, $res['statusCode']);
           $this->assertEquals(1, preg_match("/^The JSON property `$type` has to be a(n)* $type$/", trim($res['data']['error'])));
         }
       }
       foreach($positiveTests as $type => $values) {
         foreach($values as $value) {
-          $res = ApiControllerTest::test('GET', 'auth/permission/ADMIN', [ $type => $value ], $adminAccessToken);
+          $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', [ $type => $value ], $adminAccessToken);
           $this->assertEquals(200, $res['statusCode']);
         }
       }
-      $res = ApiControllerTest::test('GET', 'auth/permission/2', [ $type => $value ], $adminAccessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/2', [ $type => $value ], $adminAccessToken);
+      $this->assertEquals(422, $res['statusCode']);
       $this->assertEquals(422, $res['data']['code']);
       $this->assertEquals("The URL parameter `ID` has to match the following pattern: `/^[a-zA-Z\_]+$/`", $res['data']['error']);
-      $res = ApiControllerTest::test('GET', 'auth/permission/abc_EEFG', [ $type => $value ], $adminAccessToken);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/abc_EEFG', [ $type => $value ], $adminAccessToken);
       $this->assertEquals(200, $res['statusCode']);
+    }
+
+    function testExpiredSession() {
+      $session = $this->objFromFixture('AuthSession', 'expired');
+      $this->assertEquals(false, $session->IsValid());
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $session->Accesstoken());
+      $session = $this->objFromFixture('AuthSession', 'valid');
+      $this->assertEquals(true, $session->IsValid());
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $session->Accesstoken());
     }
 
 }

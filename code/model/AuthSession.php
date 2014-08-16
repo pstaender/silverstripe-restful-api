@@ -4,7 +4,7 @@ class AuthSession extends DataObject {
 
   private static $db = array(
     "UID" => "Varchar(64)",
-    "ValidUntilTimestamp" => "Int",
+    // "ValidUntilTimestamp" => "Int",
     "ValidUntil" => "SS_DateTime",
     "RequestedFromIP" => "Varchar(32)",
   );
@@ -21,7 +21,7 @@ class AuthSession extends DataObject {
     'Accesstoken', 'ValidUntil', 'IsValid', 'ValidUntilTimestamp', 'User', 'URI'
   );
 
-  static function get_by_accesstoken($token) {
+  static function find_by_accesstoken($token) {
     return AuthSession::get()->filter(array(
       'UID' => $token,
       'ValidUntil:GreaterThan' => time(),
@@ -31,8 +31,8 @@ class AuthSession extends DataObject {
   /**
    * We create / get a valid session by a defined accesstoken
    */
-  static function get_admin_session_by_accesstoken($token) {
-    $session = self::get_by_accesstoken($token);
+  static function find_admin_session_by_accesstoken($token) {
+    $session = self::find_by_accesstoken($token);
     if (!$session) {
       if (!(strlen(trim($token))>6)) {
         return user_error('admin authtoken must be at least 6 chars long');
@@ -73,11 +73,15 @@ class AuthSession extends DataObject {
     if (!is_integer($minutes)) {
       $minutes = $this->config()->get('validInMinutesFromNow');
     }
-    $this->ValidUntilTimestamp = $this->ValidUntil = time() + ( $minutes * 60 );
+    return $this->ValidUntil = time() + ( $minutes * 60 );
+  }
+
+  function ValidUntilTimestamp() {
+    return strtotime($this->dbObject('ValidUntil')->value);
   }
 
   function IsValid() {
-    return time() <= $this->ValidUntilTimestamp;
+    return time() <= $this->ValidUntilTimestamp();
   }
 
   function onBeforeWrite() {

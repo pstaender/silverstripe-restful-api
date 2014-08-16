@@ -34,9 +34,9 @@ class ApiController extends Controller {
     $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
     $accessToken = $this->getAccessTokenFromRequest();
     if (($adminAccessToken) && ($adminAccessToken === $accessToken)) {
-      return AuthSession::get_admin_session_by_accesstoken($adminAccessToken);
+      return AuthSession::find_admin_session_by_accesstoken($adminAccessToken);
     }
-    return AuthSession::get_by_accesstoken($accessToken);
+    return AuthSession::find_by_accesstoken($accessToken);
   }
 
   /**

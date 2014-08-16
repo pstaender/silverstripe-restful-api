@@ -22,12 +22,13 @@ class AuthController extends ApiController {
   );
 
   private static $api_allowed_actions = array(
-    "POST:session"    => true,
-    "GET:session"     => true,
-    "DELETE:session"  => true,
-    "GET:sessions"    => true,
-    "DELETE:sessions" => true,
-    "GET:permission"  => true,//'->isValidApiSession',
+    "POST:session"      => true,
+    "GET:session"       => true,
+    "DELETE:session"    => true,
+    "GET:sessions"      => true,
+    "DELETE:sessions"   => true,
+    "GET:permission"    => true,
+    "GET:no_permission" => '->isValidSession',
   );
 
   function session() {

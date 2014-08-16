@@ -34,7 +34,7 @@ class ApiControllerTest extends SapphireTest {
     ];
   }
 
-  static function test($method, $url, $data = null, $accessToken = null) {
+  static function send_test($method, $url, $data = null, $accessToken = null) {
     return self::extract_code_and_data_from_response(self::request($method, $url, $data, $accessToken));
   }
 
@@ -64,6 +64,10 @@ class ApiControllerTest extends SapphireTest {
         $testSuite->assertEquals($value, Config::inst()->get($className, $property));
       }
     }
+  }
+
+  function testActionPermissions() {
+    // TODO: write test
   }
 
 }
