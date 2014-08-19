@@ -184,7 +184,6 @@ class ApiController extends Controller {
           }
           $valueType = (strtolower($type));
           if ($value === null) {
-            // var_dump($data);
             // null is always an accepted value if field is not required
             // so if we have null, we skip the type check
           } else if (($type[0]==='/')&&($type[strlen($type)-1]==='/')) {
@@ -194,15 +193,24 @@ class ApiController extends Controller {
             }
           } else if (($valueType==='int')||($valueType==='integer')) {
             // integer
-            if (!is_int($value))
+            if (!preg_match("/^[\+\-]*\d+$/", $value)) {
               return $this->sendError("The $parameterType `$field` has to be an integer", 422);
+            } else {
+              $value = (int) $value;
+            }
           } else if (($valueType==='float')||($valueType==='number')) {
             // float
-            if ((!is_int($value)) && (!is_float($value)))
+            if (!preg_match("/^[\+\-]*(\d+(\.\d*)*|(\d*\.\d+))+$/", $value)) {
               return $this->sendError("The $parameterType `$field` has to be a float", 422);
+            } else {
+              $value = (float) $value;
+            }
           } else if ($valueType==='boolean') {
-            if (!is_bool($value))
+            if ((!is_bool($value)) && (!preg_match("/^(true|false|1|0)+$/", $value))) {
               return $this->sendError("The $parameterType `$field` has to be a boolean", 422);
+            } else {
+              $value = (boolean) $value;
+            }
           }
           $params[$field] = $value;
         }
