@@ -234,7 +234,7 @@ By deactivating blocking sessions, [you can decrease the response time](http://w
 
 Beware that none across request session will work anymore on your SilverStripe project because persistent session storage is deactivated in that scenario (not needed in pure restful services anyway).
 
-To activate this feature, add to your `_config.php`:
+To activate this feature, add to your `_config.php` or `_ss_environment.php`:
 
 ```php
   define('RESTFUL_API_MODULE_NON_BLOCKING_SESSION', true);

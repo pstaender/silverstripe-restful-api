@@ -83,7 +83,7 @@ class ApiDataObject extends DataExtension {
     $jsonDateFormat = $this->owner->config()->get('jsonDateFormat');
     $underscoreFields = $this->owner->config()->get('underscoreFields');
     $castDataObjectFields = $this->owner->config()->get('castDataObjectFields');
-    $databaseFields = DataObject::database_fields($this->owner->class);
+    $databaseFields = $this->owner->inheritedDatabaseFields();//DataObject::database_fields($this->owner->class);
     $apiFields = (isset($options['fields'])) ? $options['fields'] : $this->inheritedApiFields();
     if (!is_array($apiFields)) {
       // use inherited database fields
@@ -134,11 +134,10 @@ class ApiDataObject extends DataExtension {
         $data[$k] = (float) $value;
       } else if ($fieldType === 'boolean') {
         if (is_string($value)) {
-          $value = ($value === "true") ? true : false;
+          $data[$k] = ($value === "true") ? true : false;
         } else {
           $data[$k] = (boolean) $value;
         }
-
       } else if ($fieldType === 'ss_datetime' || $fieldType === 'date' || $fieldType === 'time') {
         $data[$k] = $this->owner->dbObject($key)->Format($jsonDateFormat);
       } else if (is_a($value, 'DataObject')) {
