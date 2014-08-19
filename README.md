@@ -149,6 +149,8 @@ How to define your own API Controller including some methods (we assume that you
 
   }
 
+```
+
 ## Interesting Controller helpers:
 
   * **getAccessTokenFromRequest**
