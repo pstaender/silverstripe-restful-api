@@ -53,7 +53,6 @@ class ApiControllerTest extends SapphireTest {
         "underscoreFields" => true,
         "useAccesstokenAuth" => true,
         "accessTokenPropertyName" => 'X-Accesstoken',
-        "allowOverrideConfiguration" => true,
       ],
       "AuthSession" => [
         "validInMinutesFromNow" => 10080,
@@ -133,6 +132,8 @@ class ApiControllerTest extends SapphireTest {
     $res = ApiControllerTest::send_test('GET', 'auth/testWrongMethodName', $data = null, $adminAccessToken, $expectJSON);
     $this->assertEquals($res['statusCode'], 404);
     $this->assertEquals($res['body'], "Action 'testWrongMethodName' isn't available on class AuthController.");
+    $res = ApiControllerTest::send_test('GET', 'auth/testSendingEmptyData', $data = null, $adminAccessToken, $expectJSON);
+    $this->assertEquals($res['statusCode'], 404);
   }
 
 }

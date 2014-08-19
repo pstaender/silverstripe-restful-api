@@ -323,6 +323,9 @@ class ApiController extends Controller {
     if ($this->help) {
       $api["help"] = (String) $this->help;
     }
+    if (($this->dataRecord === null) && (!$this->error) && (!$this->message) && (!$this->help)) {
+      return null;
+    }
     return $api;
   }
 
@@ -344,6 +347,9 @@ class ApiController extends Controller {
 
   function sendData($data = null, $code = null) {
     $apiData = $this->prepareApiData($data);
+    if ($apiData === null) {
+      return $this->sendNotFound();
+    }
     if ($code) $this->code = $code;
     $this->response = new SS_HTTPResponse();
     $this->response->addHeader('Content-Type', 'application/'.$this->format);

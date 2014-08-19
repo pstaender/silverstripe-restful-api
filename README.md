@@ -12,7 +12,6 @@ ApiController:
   underscoreFields: true
   useAccesstokenAuth: true
   accessTokenPropertyName: 'X-Accesstoken'
-  allowOverrideConfiguration: false
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null
@@ -27,7 +26,7 @@ DataObject:
     - ApiDataObject
 ```
 
-To avoid unnecessary authentication **during development** you can define a `adminAccessToken`. The check of `requiredGroup` and `requiredPermission` is not implemented, yet.
+To avoid unnecessary authentication **during development** you can define a `adminAccessToken`.
 
 ## How to use
 
@@ -91,6 +90,64 @@ Now you can use the accesstoken to perform actions.
     "message":"resource deleted successfully"
   }
 ```
+
+### Write your API Controller
+
+You can also (check out this more detailed example)[https://github.com/pstaender/silverstripe-restful-api/blob/master/code/examples/Country.php].
+
+How to define your own API Controller including some methods (we assume that you've added s.th. like `"myapicontroller//$Action/$ID": "MyApiController"` to your `routes.yml`):
+
+```php
+
+  class MyApiController extends APIController {
+
+    private static $api_parameters = [
+      "GET:client" => [
+        '$ID' => "int",
+      ],
+      "POST:client" => [
+        'email' => "/^[^@]+@[^@]+$/",
+      ],
+    ];
+
+    private static $api_allowed_actions = [
+      "GET:client"    => true,                // everyone can read here
+      "DELETE:client" => 'ADMIN',             // only admins can delete
+      "POST:client"   => '->isBasicApiUser',  // method `isBasicApiUser` checks permission
+      ]
+
+    /**
+     * Will respond with a JSON object and 200 if found
+     * with a 404 and a JSON msg object otherwise
+     */
+    function clientGET() {
+      return $this->sendData(
+        Client::get()->byID($this->request->param("ID"))
+      );
+    }
+
+    function clientPOST() {
+      $client = Client::create();
+      $data = $this->requestDataAsArray('Client');
+      $populateOnlyTheseseFields = [ "Email", "FirstName", "Surname" ];
+      $country->populateWithData($data, $populateOnlyTheseseFields);
+      $country->write();
+      return $this->sendSuccesfulPost($country->URL());
+    }
+
+    function clientDELETE() {
+      $client = Client::get()->byID($this->request->param("ID");
+      if (!$client)
+        return $this->sendNotFound();
+      $client->delete();
+      return $this->sendSuccessfulDelete();
+    }
+
+    protected function isBasicApiUser() {
+      return Permission::check('BASIC_API') || Permission::check('EXTERNAL_API');
+    }
+
+  }
 
 ## Interesting Controller helpers:
 

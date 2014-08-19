@@ -40,11 +40,8 @@ class AuthController extends ApiController {
     "DELETE:testSendSuccessfulDelete" => true,
     "POST:testSendSuccessfulPost"     => true,
     "GET:testSendNotFound"            => true,
+    "GET:testSendingEmptyData"        => true,
   );
-
-  // function index() {
-  //   return $this->sendNotFound("You need to perform an action on AuthController");
-  // }
 
   function session() {
     if ($this->request->isGET()) {
@@ -103,13 +100,6 @@ class AuthController extends ApiController {
     }
   }
 
-  // function permission() {
-  //   // will be handled by permissionGET
-  //   // but the method is needed for the framework to check the called action
-  //   // TODO: get rid of this workaround
-  //   return null;
-  // }
-
   function permissionGET() {
     $code = $this->request->param("ID");
     return $this->sendData(array(
@@ -156,6 +146,10 @@ class AuthController extends ApiController {
 
   function testADMINPermission() {
     return $this->testIsValidSession();
+  }
+
+  function testSendingEmptyData() {
+    return $this->sendData(Member::get()->byID(52435435324));
   }
 
 }
