@@ -18,6 +18,27 @@ class ApiDataObject extends DataExtension {
     return implode('_', $ret);
   }
 
+  static function to_camelcase($input, $checkID = true) {
+    $s = "";
+    for($i=0; $i < strlen($input); $i++) {
+      if ($i===0) {
+        $input[0] = strtoupper($input[0]);
+      }
+      if ($input[$i]==='_') {
+        continue;
+      }
+      if ((isset($input[$i+1])) && ($input[$i+1] === '_') && (isset($input[$i+2]))) {
+        $input[$i+2] = strtoupper($input[$i+2]);
+      }
+      // else
+      $s .= $input[$i];
+    }
+    if ($checkID) {
+      $s = preg_replace("/([a-z]{1})Id$/","$1ID", $s);
+    }
+    return $s;
+  }
+
   /**
    * Array of inherited static desriptions of `api_fields`
    * Copied from @DataOject->inheritedDatabaseFields()
@@ -60,7 +81,9 @@ class ApiDataObject extends DataExtension {
       $ownerClass = Injector::inst()->create($ownerClass);//singleton($ownerClass);
     }
     $fieldnameWithoutUnderscore = str_replace('_', '', $field);
-    if (preg_match("/^[a-z\_0-9]+$/", $field)) {
+    if (preg_match("/\_id$/", $field)) {
+      return $field = ApiDataObject::to_camelcase($field, $checkID = true);
+    } else if (preg_match("/^[a-z\_0-9]+$/", $field)) {
       foreach($ownerClass->inheritedApiFields() as $fieldName => $type) {
         if (strtolower($fieldName)===$fieldnameWithoutUnderscore)
           return $fieldName;
@@ -83,13 +106,65 @@ class ApiDataObject extends DataExtension {
     $jsonDateFormat = $this->owner->config()->get('jsonDateFormat');
     $underscoreFields = $this->owner->config()->get('underscoreFields');
     $castDataObjectFields = $this->owner->config()->get('castDataObjectFields');
+    $resolveHasOneRelations = (isset($options['resolveHasOneRelations'])) ? $options['resolveHasOneRelations'] : (($this->owner->config()->get('resolveHasOneRelations') !== null) ? $this->owner->config()->get('resolveHasOneRelations') : true );
+    $resolveHasManyRelations = (isset($options['resolveHasManyRelations'])) ? $options['resolveHasManyRelations'] : (($this->owner->config()->get('resolveHasManyRelations') !== null) ? $this->owner->config()->get('resolveHasManyRelations') : true );
     $databaseFields = $this->owner->inheritedDatabaseFields();//DataObject::database_fields($this->owner->class);
+
     $apiFields = (isset($options['fields'])) ? $options['fields'] : $this->inheritedApiFields();
     if (!is_array($apiFields)) {
       // use inherited database fields
       $apiFields = $databaseFields;
       $apiFields['ID'] = 'PrimaryKey';
     }
+
+    $data = []; // all final data will be stored in this array
+
+    if ($resolveHasOneRelations) {
+      $hasOne = Config::inst()->get($this->owner->class, 'has_one', Config::INHERITED);
+      $e = array();
+      if ($hasOne) {
+        foreach(array_keys($hasOne) as $relationName) {
+          if ($this->owner->hasMethod($relationName)) {
+
+            $fieldName = $relationName;
+            if ($underscoreFields) {
+              $fieldName = self::to_underscore($fieldName);
+            }
+            $o = $options;
+            $o['resolveHasOneRelations'] = false;
+            $relation = $this->owner->{$relationName}();
+            // we only add the record if it exists in the db
+            if ($relation->isInDB())
+              $data[$fieldName] = $relation->forApi($o);
+          }
+        }
+      }
+    }
+
+    if ($resolveHasManyRelations) {
+      $hasOne = Config::inst()->get($this->owner->class, 'has_many', Config::INHERITED);
+      $e = array();
+      if ($hasOne) {
+        foreach(array_keys($hasOne) as $relationName) {
+          if ($this->owner->hasMethod($relationName)) {
+
+            $fieldName = $relationName;
+            if ($underscoreFields) {
+              $fieldName = self::to_underscore($fieldName);
+            }
+            $o = $options;
+            $o['resolveHasManyRelations'] = false;
+            $relations = $this->owner->{$relationName}();
+            // we only add the record if it exists in the db
+            foreach($relations as $relation) {
+              if ($relation->isInDB())
+                $data[$fieldName][] = $relation->forApi($o);
+            }
+          }
+        }
+      }
+    }
+
     // check if assoz. array
     if (array_keys($apiFields) !== range(0, count($apiFields) - 1)) {
       // if assoziative array (default), leave it as it is
@@ -104,7 +179,6 @@ class ApiDataObject extends DataExtension {
 
     // $record = $this->owner->toMap();
 
-    $data = [];
     foreach($fields as $key => $k) {
       // $key, original field, $k target field to match
       $type = (isset($databaseFields[$key])) ? $databaseFields[$key] : null;
@@ -128,7 +202,7 @@ class ApiDataObject extends DataExtension {
       if ($value === null) {
         // keep as null
         $data[$k] = null;
-      } else if ($fieldType === 'int' || $fieldType === 'foreignkey' || $fieldType === 'primarykey') {
+      } else if ($fieldType === 'int' || $fieldType === 'primarykey') {
         $data[$k] = (int) $value;
       } else if ($fieldType === 'float' || $fieldType === 'decimal' || $fieldType === 'currency' || $fieldType === 'percentage') {
         $data[$k] = (float) $value;

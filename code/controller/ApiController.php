@@ -67,6 +67,7 @@ class ApiController extends Controller {
   protected function requestDataAsArray($className) {
     $data = $this->requestBodyAsArray();
     $d = array();
+
     foreach($data as $key => $value) {
       $d[ApiDataObject::real_field_name($key, $className)] = $value;
     }
@@ -180,7 +181,7 @@ class ApiController extends Controller {
           }
           if (($isRequired) && ($value == null)) {
             $errorMessage .= "The $parameterType `$field` is required";
-            return $this->sendError($errorMessage, 422);
+            return $this->sendParameterError($errorMessage);
           }
           $valueType = (strtolower($type));
           if ($value === null) {
@@ -189,25 +190,25 @@ class ApiController extends Controller {
           } else if (($type[0]==='/')&&($type[strlen($type)-1]==='/')) {
             // regular pregmatch
             if (!preg_match($type, $value)) {
-              return $this->sendError("The $parameterType `$field` has to match the following pattern: `$type`", 422);
+              return $this->sendParameterError("The $parameterType `$field` has to match the following pattern: `$type`");
             }
           } else if (($valueType==='int')||($valueType==='integer')) {
             // integer
             if (!preg_match("/^[\+\-]*\d+$/", $value)) {
-              return $this->sendError("The $parameterType `$field` has to be an integer", 422);
+              return $this->sendParameterError("The $parameterType `$field` has to be an integer");
             } else {
               $value = (int) $value;
             }
           } else if (($valueType==='float')||($valueType==='number')) {
             // float
             if (!preg_match("/^[\+\-]*(\d+(\.\d*)*|(\d*\.\d+))+$/", $value)) {
-              return $this->sendError("The $parameterType `$field` has to be a float", 422);
+              return $this->sendParameterError("The $parameterType `$field` has to be a float");
             } else {
               $value = (float) $value;
             }
           } else if ($valueType==='boolean') {
             if ((!is_bool($value)) && (!preg_match("/^(true|false|1|0)+$/", $value))) {
-              return $this->sendError("The $parameterType `$field` has to be a boolean", 422);
+              return $this->sendParameterError("The $parameterType `$field` has to be a boolean");
             } else {
               $value = (boolean) $value;
             }
@@ -410,6 +411,10 @@ class ApiController extends Controller {
   }
 
   function sendPermissionFailure($msg = 'permission failure', $code = 401) {
+    return $this->sendError($msg, $code);
+  }
+
+  function sendParameterError($msg = 'wrong / missing parameter(s)', $code = 422) {
     return $this->sendError($msg, $code);
   }
 
