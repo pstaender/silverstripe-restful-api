@@ -78,7 +78,11 @@ class ApiController extends Controller {
     return (is_array($data)) ? new ArrayData($data) : null;
   }
 
-  function handleAction($request, $action) {
+  // public function handleRequest(SS_HTTPRequest $request, DataModel $model) {
+  //   exit("!");
+  // }
+
+  protected function handleAction($request, $action) {
     $method = $request->httpMethod(); // POST|GET|PUT…
     $allParams = $request->allParams(); // from router
     $extension = $request->getExtension(); // .html
@@ -148,14 +152,6 @@ class ApiController extends Controller {
           $isURLParameter = ($field[0] === '$') ? true : false;
           $field = preg_replace('/^(\?|\$)*(.*?)(\!)*$/', "$2", $field);
           $camelCaseFieldName = null;
-          // if (preg_match("/^[a-z\_]$/",$field)) {
-          //   return user_error("Field identifier `$field` in \$api_fields has to be CamelCase to work correctly.");
-          // }
-          // if (($underscoreFields) && (preg_match("/^[A-Z]$/",$field))) {
-          //   $camelCaseFieldName = $field;
-          //   $field = ApiDataObject::to_underscore($field);
-          // }
-
           if ($isQueryParameter) {
             if (isset($requestVars[$field])) {
               $value = $requestVars[$field];
@@ -217,10 +213,29 @@ class ApiController extends Controller {
   }
 
   /**
+   * Checks if this request handler has a specific action,
+   * even if the current user cannot access it.
+   * We check for actionNameMETHOD() as well if no action exists
+   * RequestHandler.php -> handleAction()
+   *
+   * @param string $action
+   * @return bool
+   */
+  public function hasAction($action) {
+    if (!parent::hasAction($action)) {
+      if (
+        ($this->hasMethod($action.'GET')) || ($this->hasMethod($action.'POST')) || ($this->hasMethod($action.'DELETE')) || ($this->hasMethod($action.'PUT')) || ($this->hasMethod($action.'PATCH'))
+      ) {
+        return true;
+      }
+    }
+    return parent::hasAction($action);
+  }
+
+  /**
    * Checks method and action for request
    * RequestHandler.php -> handleRequest()
    * @param  string $action
-   * @param  string $method
    * @return boolean
    */
   public function checkAccessAction($action) {
@@ -240,7 +255,7 @@ class ApiController extends Controller {
           return user_error("Ensure that `api_allowed_actions` fulfills the following pattern: `\$method:\$action` => `\$permission`");
         }
         $allowedMethod = strtoupper($matches[1]);
-        $allowedAction = strtolower($matches[2]);
+        $allowedAction = $matches[2];
         if ((($allowedMethod === $method)||($allowedMethod === "*")) && ($allowedAction === $action)) {
           if ($permission === true) {
             // wildcard
@@ -343,34 +358,34 @@ class ApiController extends Controller {
   function sendError($errMsg = 'unspecified error', $errCode = 500) {
     $args = $this->sortCodeAndMessage($errMsg, $errCode);
     $this->error = $args['message'];
-    $this->code  = $args['code'];
+    $this->code  = $this->statusCode = $args['code'];
     return $this->sendData();
   }
 
   function sendSuccessfulPut($msg = 'resource updated successfully', $code = 201) {
     $args = $this->sortCodeAndMessage($code, $msg);
-    $this->statusCode = $args['code'];
+    $this->code = $this->statusCode = $args['code'];
     $this->message = $args['message'];
     return $this->sendData();
   }
 
   function sendSuccessfulDelete($msg = 'resource deleted successfully', $code = 202) {
     $args = $this->sortCodeAndMessage($code, $msg);
-    $this->statusCode = $args['code'];
+    $this->code = $this->statusCode = $args['code'];
     $this->message = $args['message'];
     return $this->sendData();
   }
 
   function sendNotFound($msg = 'resource not found', $code = 404) {
     $args = $this->sortCodeAndMessage($code, $msg);
-    $this->statusCode = $args['code'];
+    $this->code = $this->statusCode = $args['code'];
     $this->message = $args['message'];
     return $this->sendData();
   }
 
   function sendSuccessfulPost($uriOrData = null, $code = 201, $msg = 'resource created succesfully') {
     $args = $this->sortCodeAndMessage($code, $msg);
-    $this->statusCode = $args['code'];
+    $this->code = $this->statusCode = $args['code'];
     $this->message = $args['message'];
     if (is_string($uriOrData)) {
       $this->statusCode = 303;

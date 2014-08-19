@@ -146,6 +146,7 @@ class AuthControllerTest extends SapphireTest {
       $this->assertEquals(200, $res['statusCode']);
     }
 
+
     function testExpiredSession() {
       $session = $this->objFromFixture('AuthSession', 'expired');
       $this->assertEquals(false, $session->IsValid());

@@ -22,14 +22,29 @@ class AuthController extends ApiController {
   );
 
   private static $api_allowed_actions = array(
-    "POST:session"      => true,
-    "GET:session"       => true,
-    "DELETE:session"    => true,
-    "GET:sessions"      => true,
-    "DELETE:sessions"   => true,
-    "GET:permission"    => true,
-    "GET:no_permission" => '->isValidSession',
+    "GET:index"                       => true,
+    "POST:session"                    => true,
+    "GET:session"                     => true,
+    "DELETE:session"                  => true,
+    "GET:sessions"                    => true,
+    "DELETE:sessions"                 => true,
+    "GET:permission"                  => true,
+    // these inoffensive methods are for testing only and have no productive reason
+    "GET:testWrongMethodName"         => '->permissionMethodShouldNotExists',
+    "GET:testIsValidSession"          => '->isValidApiSession',
+    "GET:testAPIPermission"           => 'API_ACCESS',
+    "GET:testADMINPermission"         => 'ADMIN',
+    "GET:testPermissionFailure"       => true,
+    "GET:testSendError"               => true,
+    "PUT:testSuccessfulPut"           => true,
+    "DELETE:testSendSuccessfulDelete" => true,
+    "POST:testSendSuccessfulPost"     => true,
+    "GET:testSendNotFound"            => true,
   );
+
+  // function index() {
+  //   return $this->sendNotFound("You need to perform an action on AuthController");
+  // }
 
   function session() {
     if ($this->request->isGET()) {
@@ -88,12 +103,12 @@ class AuthController extends ApiController {
     }
   }
 
-  function permission() {
-    // will be handled by permissionGET
-    // but the method is needed for the framework to check the called action
-    // TODO: get rid of this workaround
-    return null;
-  }
+  // function permission() {
+  //   // will be handled by permissionGET
+  //   // but the method is needed for the framework to check the called action
+  //   // TODO: get rid of this workaround
+  //   return null;
+  // }
 
   function permissionGET() {
     $code = $this->request->param("ID");
@@ -103,6 +118,44 @@ class AuthController extends ApiController {
         "granted" => Permission::check($code),
       ),
     ));
+  }
+
+  function testIsValidSession() {
+    return $this->sendData(array(
+      "message" => "This data should only be seen if we have a valid session",
+    ));
+  }
+
+  function testPermissionFailure() {
+    return $this->sendPermissionFailure();
+  }
+
+  function testSendError() {
+    return $this->sendError();
+  }
+
+  function testSuccessfulPut() {
+    return $this->sendSuccessfulPut();
+  }
+
+  function testSendSuccessfulDelete() {
+    return $this->sendSuccessfulDelete();
+  }
+
+  function testSendNotFound() {
+    return $this->sendNotFound();
+  }
+
+  function testSendSuccessfulPost() {
+    return $this->sendSuccessfulPost();
+  }
+
+  function testAPIPermission() {
+    return $this->testIsValidSession();
+  }
+
+  function testADMINPermission() {
+    return $this->testIsValidSession();
   }
 
 }

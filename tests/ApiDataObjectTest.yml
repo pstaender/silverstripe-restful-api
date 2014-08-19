@@ -34,3 +34,7 @@ AuthSession:
      UID: 3f0df45ccc569eb0627afb40e184559fa8657baa
      ValidUntil: 7040551390
      Member: =>Member.admin
+   api:
+     UID: 4f0df45ccc569eb0627afb40e184559fa8657baa
+     ValidUntil: 7040551390
+     Member: =>Member.api

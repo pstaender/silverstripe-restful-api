@@ -5,4 +5,4 @@ After:
 ---
 Director:
   rules:
-    'auth//$Action/$ID': 'AuthController'
+    'auth//$Action/$ID/$OtherID': 'AuthController'

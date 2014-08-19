@@ -102,19 +102,18 @@ Now you can use the accesstoken to perform actions.
     - Send a DataList, DataObject or an Array; will be rendered as JSON by default
   * **sendJSON($data = null, $code = null)**
     - Same as sendData, except to force JSON
-  * **sendError($errMsg, $errCode = 500)**
+  * **sendError($errMsg, $code = 500)**
     - Use to send comprehensible error messages for the API user
-  * **sendNotFound($code = 404, $msg = 'resource not found')**
+  * **sendNotFound($msg = 'resource not found', $code = 404)**
     - Helper to send a default "Resource not found" error message
-  * **sendSuccessfulDelete($code = 202, $msg = 'resource deleted successfully')**
+  * **sendSuccessfulDelete($msg = 'resource deleted successfully', $code = 202)**
     - Helper to send a default "Resource deleted successfully" message after a `DELETE`
-  * **sendSuccessfulPut($code = 202, $msg = 'resource updated successfully')**
+  * **sendSuccessfulPut($msg = 'resource updated successfully', $code = 202)**
     - Helper to send a default "Resource updated successfully" message after a `PUT`
-  * **sendSuccessfulPost($uriOrData = null, $code = 201, $msg = 'resource created succesfully')**
+  * **sendSuccessfulPost($uriOrData = null, $msg = 'resource created succesfully', $code = 201)**
     - Helper to redirect to new resource (if $uriOrData is a string) or send a default "Resource created successfully" message after a `POST`
 
-
-### CRUD
+To keep it simple: the arguments order of `$msg` and `$code` is arbitrary.
 
 ### Tests
 
@@ -132,11 +131,11 @@ to run specific tests.
 
 Ensure that you have defined [$_FILE_TO_URL_MAPPING](http://doc.silverstripe.org/framework/en/topics/commandline) in `_ss_environment.php` to run controller tests correctly (otherwise redirects will throw an user error for instance).
 
-### Increase performance
+### Better performance
 
-By deactivating blocking sessions, you can increase the response time.
+By deactivating blocking sessions, [you can decrease the response time](http://www.silverstripe.org/improving-silverstripe-performance/).
 
-Beware that none across request session will work anymore because persistent session storage is deactivated in that scenario (not needed in pure restful services anyway).
+Beware that none across request session will work anymore on your SilverStripe project because persistent session storage is deactivated in that scenario (not needed in pure restful services anyway).
 
 To activate this feature, add to your `_config.php`:
 
