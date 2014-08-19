@@ -155,15 +155,26 @@ class ApiDataObject extends DataExtension {
    * @param   array|DataObject    Data to populate
    * @only    array               an array with fields to populate exclusive, e.g. [ "Name", "Email" ]
    */
-  function populateWithData($data, $only = null) {
+  function populateWithData($data, $only = null, $exclude = null) {
     if (is_a($data, 'DataObject')) {
       $data = $data->toMap();
     }
-    return $this->populateWithArrayData($data, $only);
+    return $this->populateWithArrayData($data, $only, $exclude);
   }
 
-  function populateWithArrayData(array $data, $only = null/*, $exclude = ["ID"]*/) {
+  function populateWithArrayData(array $data, $only = null, $exclude = null) {
     $hasOnlyFilter = is_array($only);
+    $hasExcludeFilter = is_array($exclude);
+    if ($hasExcludeFilter) {
+      foreach($exclude as $field) {
+        $altField = ApiDataObject::real_field_name($field, $this->owner);
+        if (isset($data[$field])) {
+          unset($data[$field]);
+        } else if (isset($data[$altField])) {
+          unset($data[$altField]);
+        }
+      }
+    }
     foreach($data as $key => $value) {
       $field = ApiDataObject::real_field_name($key, $this->owner);
       if (($hasOnlyFilter) && (!in_array($field, $only, true))) {

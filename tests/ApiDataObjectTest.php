@@ -61,20 +61,25 @@ class ApiDataObjectTest extends SapphireTest {
         "FirstName" => "Philipp",
         "Email" => "philipp@home.com",
         "ID" => 123,
+        "NumVisit" => 333333,
       ];
       $member = $this->objFromFixture('Member', 'api');
-      $member->populateWithArrayData($data);
+      $member->populateWithArrayData($data, null, [ "NumVisit" ]);
       foreach($data as $field => $exptectedValue) {
-        $this->assertEquals($exptectedValue, $member->{$field});
+        if ($field === 'NumVisit')
+          $this->assertFalse($exptectedValue === $member->{$field});
+        else
+          $this->assertEquals($exptectedValue, $member->{$field});
       }
       // we also ensure that we can work with underscore field names
       $underscoreData = [
         "first_name" => "Philipp",
         "email" => "philipp@home.com",
         "id" => 123,
+        "num_visit" => 333333,
       ];
       $member = $this->objFromFixture('Member', 'api');
-      $member->populateWithArrayData($underscoreData);
+      $member->populateWithArrayData($underscoreData, null, [ "NumVisit" ]);
       foreach($data as $field => $exptectedValue) {
         $field = ApiDataObject::real_field_name($field, $member);
         $this->assertEquals($exptectedValue, $member->{$field});
