@@ -91,15 +91,53 @@ Now you can use the accesstoken to perform actions.
   }
 ```
 
-### Write your API Controller
+## Use in your project
 
 You can also (check out this more detailed example)[https://github.com/pstaender/silverstripe-restful-api/blob/master/code/examples/Country.php].
 
-How to define your own API Controller including some methods (we assume that you've added s.th. like `"myapicontroller//$Action/$ID": "MyApiController"` to your `routes.yml`):
+### Data model(s)
+
+You may apply some extra definitions on your models to prepare them for API use:
 
 ```php
 
-  class MyApiController extends APIController {
+  class Client extends DataObject {
+
+    private static $db = [
+      "Email" => "Varchar",
+      "FirstName" => "Varchar",
+      "Surname" => "Varchar",
+      "Note" => "Text",
+    ];
+
+    // these fields be made available by default through `forApi`
+    private static $api_fields = [
+      "Email", "Name",
+    ];
+
+    // example method
+    function Name() {
+      return trim($this->FirstName. " " .$this->Surname);
+    }
+
+    // can be defined optional
+    function forApi() {
+      $data = parent::forApi(); // will contain s.th. like [ "Email" => "…", "Name" => "…" ]
+      // do s.th. with the data if you want to …
+      return $data;
+    }
+
+  }
+
+```
+
+### API Controller(s)
+
+How to define your own API Controller including some methods (we assume that you've added s.th. like `"client//$Action/$ID": "ClientController"` to your `routes.yml`):
+
+```php
+
+  class ClientController extends APIController {
 
     private static $api_parameters = [
       "GET:client" => [

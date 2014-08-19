@@ -3,6 +3,12 @@
 class ApiDataObject extends DataExtension {
 
 
+  /**
+   * Transforms a (CamelCase) string to a underscore string
+   *
+   * @param   String  $input  String to transform
+   * @return  String          String as underscore string
+   */
   static function to_underscore($input) {
     preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $input, $matches);
     $ret = $matches[0];
@@ -22,7 +28,7 @@ class ApiDataObject extends DataExtension {
     $currentObj = $this->owner->class;
 
     while($currentObj != 'DataObject') {
-      $apiFields  = $this->owner->stat('api_fields');
+      $apiFields  = singleton($currentObj)->stat('api_fields');
       if ($apiFields === null) {
         $apiFields = $this->owner->stat('db');
         $fields['ID'] = 'ID'; // we have to add manually 'ID'
@@ -37,6 +43,7 @@ class ApiDataObject extends DataExtension {
         $fields = array_merge($fields, $apiFields);
       }
       $currentObj = get_parent_class($currentObj);
+
     }
 
     return array_unique($fields);
@@ -64,6 +71,14 @@ class ApiDataObject extends DataExtension {
   }
 
 
+  /**
+   * This method is used by `ApiController` to get an array of data for the default output.
+   * Override this method on your model to apply custom behavior and fields.
+   * By default all fields which are defined on `api_fields` will be used (all field if not defined).
+   *
+   * @param   array   $options    optional assoz. array, fields => array of fields
+   * @return  array   $data       assoz. array containing data for the output
+   */
   function forApi($options = null) {
     $jsonDateFormat = $this->owner->config()->get('jsonDateFormat');
     $underscoreFields = $this->owner->config()->get('underscoreFields');
@@ -87,8 +102,9 @@ class ApiDataObject extends DataExtension {
       }
     }
 
-    $data = [];
     // $record = $this->owner->toMap();
+
+    $data = [];
     foreach($fields as $key => $k) {
       // $key, original field, $k target field to match
       $type = (isset($databaseFields[$key])) ? $databaseFields[$key] : null;
@@ -100,13 +116,15 @@ class ApiDataObject extends DataExtension {
       if ($underscoreFields) {
         $k = self::to_underscore($k);
       }
+
+      $data[$k] = $value;
+
       if (!$castDataObjectFields) {
-        $data[$k] = $value;
         continue;
       }
       // Types: http://doc.silverstripe.com/framework/en/topics/data-types
       // castDataObjectFields
-      $fieldType = strtolower($type); // lowercase is less ambigious to compare
+      $fieldType = strtolower($type); // lowercase is easier to compare
       if ($value === null) {
         // keep as null
         $data[$k] = null;
@@ -125,16 +143,23 @@ class ApiDataObject extends DataExtension {
         $data[$k] = $this->owner->dbObject($key)->Format($jsonDateFormat);
       } else if (is_a($value, 'DataObject')) {
         // if we have a dataobject, call recursive ->forApi()
-        $data[$k] = $value->forApi();
-      }else {
-        $data[$k] = $value;
+        $data[$k] = $value->forApi($options);
       }
     }
     return $data;
   }
 
+  /**
+   * This method will populate a DataObject with data from a given array (recommend) or DataObject
+   * Use this method to apply data from request(s) (body or other parameters)
+   *
+   * @param   array|DataObject    Data to populate
+   * @only    array               an array with fields to populate exclusive, e.g. [ "Name", "Email" ]
+   */
   function populateWithData($data, $only = null) {
-    // TODO: convert to array if DataObject
+    if (is_a($data, 'DataObject')) {
+      $data = $data->toMap();
+    }
     return $this->populateWithArrayData($data, $only);
   }
 
