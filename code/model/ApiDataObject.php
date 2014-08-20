@@ -90,7 +90,7 @@ class ApiDataObject extends DataExtension {
         $fields['ClassName'] = 'ClassName';
         $fields['Created'] = 'Created';
         $fields['LastEdited'] = 'LastEdited';
-        foreach ($apiFields as $field => $type) {
+        if (is_array($apiFields)) foreach ($apiFields as $field => $type) {
           $fields[$field] = $field;
         }
       }
