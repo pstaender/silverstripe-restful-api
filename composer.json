@@ -1,0 +1,23 @@
+{
+  "name": "pstaender/silverstripe-restful-api",
+  "description": "Restul API helpers for SilverStripe",
+  "type": "silverstripe-module",
+  "homepage": "https://github.com/pstaender/silverstripe-restful-api",
+  "keywords": [
+    "silverstripe",
+    "api",
+    "restful",
+    "json"
+  ],
+  "license": "MIT License",
+  "authors": [{
+    "name": "Philipp Staender",
+    "email": "philipp.staender@gmail.com"
+  }],
+  "support": {
+    "issues": "https://github.com/pstaender/silverstripe-restful-api/issues"
+  },
+  "require": {
+    "php": ">=5.3.0"
+  }
+}

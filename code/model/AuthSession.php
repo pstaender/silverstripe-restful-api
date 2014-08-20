@@ -4,7 +4,6 @@ class AuthSession extends DataObject {
 
   private static $db = array(
     "UID" => "Varchar(64)",
-    // "ValidUntilTimestamp" => "Int",
     "ValidUntil" => "SS_DateTime",
     "RequestedFromIP" => "Varchar(32)",
   );

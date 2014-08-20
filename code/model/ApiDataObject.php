@@ -151,7 +151,7 @@ class ApiDataObject extends DataExtension {
       $apiFields['ID'] = 'PrimaryKey';
     }
 
-    $data = []; // all final data will be stored in this array
+    $data = array(); // all final data will be stored in this array
 
     if ($resolveHasOneRelations) {
       $hasOne = Config::inst()->get($this->owner->class, 'has_one', Config::INHERITED);
@@ -205,7 +205,7 @@ class ApiDataObject extends DataExtension {
       $fields = $apiFields;
     } else {
       // convert to assoz. array
-      $fields = [];
+      $fields = array();
       foreach($apiFields as $field) {
         $fields[$field] = $field;
       }

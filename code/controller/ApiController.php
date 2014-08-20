@@ -123,7 +123,7 @@ class ApiController extends Controller {
     $errorType = null;
     $errorMessage = "";
 
-    $parameters = [];
+    $parameters = array();
     $apiParameters = $this->stat('api_parameters');
 
     $alternateAction = $action.$method; // actionMETHOD, e.g. indexPOST()
@@ -289,7 +289,7 @@ class ApiController extends Controller {
   }
 
   protected function prepareApiData($data = null) {
-    $api = [];
+    $api = array();
     if ($data) {
       $this->dataRecord = $data;
     }
