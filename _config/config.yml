@@ -5,6 +5,7 @@ ApiController:
   underscoreFields: true
   useAccesstokenAuth: true
   accessTokenPropertyName: 'X-Accesstoken'
+  useDataProperty: false
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null

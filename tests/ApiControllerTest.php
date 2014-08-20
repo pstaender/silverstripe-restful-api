@@ -65,6 +65,7 @@ class ApiControllerTest extends SapphireTest {
         "jsonDateFormat" => 'D M d Y H:i:s O',
         "underscoreFields" => true,
         "castDataObjectFields" => true,
+        "useDataProperty" => false, 
       ],
     ];
     foreach($expectedConfig as $className => $fields) {
@@ -88,28 +89,28 @@ class ApiControllerTest extends SapphireTest {
     // $this->assertEquals($res['body'], "Action 'testIsValidSession' isn't allowed on class AuthController.");
     $this->assertEquals($res['statusCode'], 403);
     $res = ApiControllerTest::send_test('GET', 'auth/testIsValidSession', $data = null, $adminAccessToken);
-    $this->assertEquals($res['data']['data']['message'], $msgValidSession);
+    $this->assertEquals($res['data']['message'], $msgValidSession);
     $this->assertEquals($res['statusCode'], 200);
     $res = ApiControllerTest::send_test('GET', 'auth/testAPIPermission', $data = null, $invalidAccessToken, $expectJSON);
     // $this->assertEquals($res['body'], "Action 'testAPIPermission' isn't allowed on class AuthController.");
     $this->assertEquals($res['statusCode'], 403);
     $session = $this->objFromFixture('AuthSession', 'api');
     $res = ApiControllerTest::send_test('GET', 'auth/testAPIPermission', $data = null, $session->Accesstoken());
-    $this->assertEquals($res['data']['data']['message'], $msgValidSession);
+    $this->assertEquals($res['data']['message'], $msgValidSession);
     $this->assertEquals($res['statusCode'], 200);
     $res = ApiControllerTest::send_test('GET', 'auth/testADMINPermission', $data = null, $session->Accesstoken(), $expectJSON);
     $this->assertEquals($res['statusCode'], 403);
     $session = $this->objFromFixture('AuthSession', 'valid');
     $res = ApiControllerTest::send_test('GET', 'auth/testADMINPermission', $data = null, $session->Accesstoken());
-    $this->assertEquals($res['data']['data']['message'], $msgValidSession);
+    $this->assertEquals($res['data']['message'], $msgValidSession);
     $this->assertEquals($res['statusCode'], 200);
     $res = ApiControllerTest::send_test('GET', 'auth/testADMINPermission', $data = null, $adminAccessToken, $expectJSON);
-    $this->assertEquals($res['data']['data']['message'], $msgValidSession);
+    $this->assertEquals($res['data']['message'], $msgValidSession);
     $this->assertEquals($res['statusCode'], 200);
     $res = ApiControllerTest::send_test('GET', 'auth/testAPIPermission', $data = null, $session->Accesstoken());
     $this->assertEquals($res['statusCode'], 200);
     $res = ApiControllerTest::send_test('GET', 'auth/testADMINPermission', $data = null, $adminAccessToken);
-    $this->assertEquals($res['data']['data']['message'], $msgValidSession);
+    $this->assertEquals($res['data']['message'], $msgValidSession);
     $this->assertEquals($res['statusCode'], 200);
     $res = ApiControllerTest::send_test('GET', 'auth/testPermissionFailure', $data = null, $adminAccessToken);
     $this->assertEquals($res['statusCode'], 401);

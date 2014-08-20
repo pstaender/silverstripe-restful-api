@@ -1,5 +1,11 @@
 # Restul API for SilverStripe
 
+This module provides an basic API controller with helpers to manage (underscore based) JSON data for i/o. Additionally there are some helpful methods on DataObjects, `forApi()` for instance. To authenticate the API controller is using the SilverStripe build security system but provides an Auth controller to authenticate in a restful way.
+
+## Motivation
+
+Build fast and easy API's without writing the same helper methods over and over again. Currently it's in a development state, so some (design) decision might change to provide the convenient tools with at least surprising behaviour.
+
 ## Configuration
 
 The following attributes can be configured:
@@ -12,6 +18,7 @@ ApiController:
   underscoreFields: true
   useAccesstokenAuth: true
   accessTokenPropertyName: 'X-Accesstoken'
+  useDataProperty: false
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null
@@ -22,11 +29,11 @@ DataObject:
   jsonDateFormat: 'D M d Y H:i:s O'
   underscoreFields: true
   castDataObjectFields: true
-  extensions:
-    - ApiDataObject
+  resolveHasOneRelations: true
+  resolveHasManyRelations: true
 ```
 
-To avoid unnecessary authentication **during development** you can define a `adminAccessToken`.
+To avoid unnecessary authentication **during development** you can use the `adminAccessToken` (default is `84c44b7ee63a9919aa272673eecfc7f9b7424e47` in dev mode).
 
 ## How to use
 
@@ -47,7 +54,7 @@ Returns (with StatusCode 200):
 
 ```json
   {
-    "data":{
+    "session":{
       "accesstoken":"8d69f3f127a9ddc4f73d75c5803c846696bb10ff",
       "valid_until":"Mon Sep 28 2015 03:01:06 +0200",
       "valid_until_timestamp":1443402066,
@@ -68,7 +75,7 @@ Now you can use the accesstoken to perform actions.
 
 ```json
   {
-    "data":{
+    "session":{
       "accesstoken":"8d69f3f127a9ddc4f73d75c5803c846696bb10ff",
       "valid_until":"Mon Sep 28 2015 03:28:06 +0200",
       "valid_until_timestamp":1443403686,

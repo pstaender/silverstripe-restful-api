@@ -9,107 +9,107 @@ class AuthControllerTest extends SapphireTest {
     function testExpectedDefaultConfigValues() {
       ApiControllerTest::ensure_correct_config($this);
     }
-    //
-    // function testAuthWithWrongCredentials() {
-    //   $data = [
-    //     "email" => "jdancm",
-    //     "password" => "cklmncac",
-    //   ];
-    //   $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
-    //   $this->assertEquals(400, $res['statusCode']);
-    //   $this->assertEquals("Couldn't match password / email", $res['data']['error']);
-    //   unset($data["password"]);
-    //   $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
-    //   $this->assertEquals(422, $res['statusCode']);
-    //   $this->assertEquals("The JSON property `password` is required", $res['data']['error']);
-    // }
-    //
-    // function testAuthWithValidCredentials() {
-    //   $data = [
-    //     "email" => "admin@silverstripe.com",
-    //     "password" => "password",
-    //   ];
-    //   $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
-    //   $this->assertEquals(201, $res['statusCode']);
-    //   $this->assertTrue(strlen($res['data']['data']['accesstoken'])>6);
-    // }
-    //
-    // function testValidSession() {
-    //   $data = [
-    //     "email" => "admin@silverstripe.com",
-    //     "password" => "password",
-    //   ];
-    //   $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
-    //   $accessToken = $res['data']['data']['accesstoken'];
-    //   $res = ApiControllerTest::send_test('GET', 'auth/session', null, $accessToken);
-    //   $this->assertEquals(200, $res['statusCode']);
-    //   $this->assertEquals($accessToken, $res['data']['data']['accesstoken']);
-    //   // TODO: test validuntil!
-    // }
-    //
-    // function testDeleteSession() {
-    //   $data = [
-    //     "email" => "admin@silverstripe.com",
-    //     "password" => "password",
-    //   ];
-    //   // create session
-    //   $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
-    //   $accessToken = $res['data']['data']['accesstoken'];
-    //   // check session exists (redundant test segment (post+get), but ensures that test succeeded until here)
-    //   $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
-    //   $this->assertEquals(200, $res['statusCode']);
-    //   // delete session (i.e. logout)
-    //   $url = 'auth/session/'.$accessToken;
-    //   $res = ApiControllerTest::send_test('DELETE', $url, null, $accessToken);
-    //   $this->assertEquals(202, $res['statusCode']);
-    //   $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
-    //   $this->assertEquals(404, $res['statusCode']);
-    //   // TODO: test validuntil!
-    // }
-    //
-    // function testPermissionForSession() {
-    //   $data = [
-    //     "email" => "admin@silverstripe.com",
-    //     "password" => "password",
-    //   ];
-    //   // create session
-    //   $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
-    //   $accessToken = $res['data']['data']['accesstoken'];
-    //   // check session exists (redundant test segment, but ensures that test succeeded until here)
-    //   $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
-    //   $this->assertEquals(200, $res['statusCode']);
-    //   $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $accessToken);
-    //   $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
-    //   $this->assertEquals(true, $res['data']['data']['permission']['granted']);
-    // }
-    //
-    // function testAdminAccessToken() {
-    //   $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
-    //   $accessToken = sha1('somerandomaccesstoken');
-    //   $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
-    //   // we expect neither to find a session
-    //   $this->assertEquals(404, $res['statusCode']);
-    //   $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $accessToken);
-    //   // neither to have any admin privileges
-    //   $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
-    //   $this->assertEquals(false, $res['data']['data']['permission']['granted']);
-    //   // but we should have both with ad admin access token:
-    //   // a valid session
-    //   $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $adminAccessToken);
-    //   $this->assertEquals($adminAccessToken, $res['data']['data']['accesstoken']);
-    //   $this->assertTrue($res['data']['data']['is_valid']);
-    //   // and admin permission(s)
-    //   $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $adminAccessToken);
-    //   $this->assertEquals('ADMIN', $res['data']['data']['permission']['code']);
-    //   $this->assertEquals(true, $res['data']['data']['permission']['granted']);
-    // }
-    //
-    // function testRequiredFields() {
-    //   $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
-    //   $res = ApiControllerTest::send_test('GET', 'auth/permission/', null, $adminAccessToken);
-    //   $this->assertEquals("The URL parameter `ID` is required", $res['data']['error']);
-    //   $this->assertEquals(422, $res['data']['code']);
-    // }
+
+    function testAuthWithWrongCredentials() {
+      $data = [
+        "email" => "jdancm",
+        "password" => "cklmncac",
+      ];
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
+      $this->assertEquals(400, $res['statusCode']);
+      $this->assertEquals("Couldn't match password / email", $res['data']['error']);
+      unset($data["password"]);
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
+      $this->assertEquals(422, $res['statusCode']);
+      $this->assertEquals("The JSON property `password` is required", $res['data']['error']);
+    }
+
+    function testAuthWithValidCredentials() {
+      $data = [
+        "email" => "admin@silverstripe.com",
+        "password" => "password",
+      ];
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
+      $this->assertEquals(201, $res['statusCode']);
+      $this->assertTrue(strlen($res['data']['session']['accesstoken'])>6);
+    }
+
+    function testValidSession() {
+      $data = [
+        "email" => "admin@silverstripe.com",
+        "password" => "password",
+      ];
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
+      $accessToken = $res['data']['session']['accesstoken'];
+      $res = ApiControllerTest::send_test('GET', 'auth/session', null, $accessToken);
+      $this->assertEquals(200, $res['statusCode']);
+      $this->assertEquals($accessToken, $res['data']['session']['accesstoken']);
+      // TODO: test validuntil!
+    }
+
+    function testDeleteSession() {
+      $data = [
+        "email" => "admin@silverstripe.com",
+        "password" => "password",
+      ];
+      // create session
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
+      $accessToken = $res['data']['session']['accesstoken'];
+      // check session exists (redundant test segment (post+get), but ensures that test succeeded until here)
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
+      $this->assertEquals(200, $res['statusCode']);
+      // delete session (i.e. logout)
+      $url = 'auth/session/'.$accessToken;
+      $res = ApiControllerTest::send_test('DELETE', $url, null, $accessToken);
+      $this->assertEquals(202, $res['statusCode']);
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
+      $this->assertEquals(404, $res['statusCode']);
+      // TODO: test validuntil!
+    }
+
+    function testPermissionForSession() {
+      $data = [
+        "email" => "admin@silverstripe.com",
+        "password" => "password",
+      ];
+      // create session
+      $res = ApiControllerTest::send_test('POST', 'auth/session', $data);
+      $accessToken = $res['data']['session']['accesstoken'];
+      // check session exists (redundant test segment, but ensures that test succeeded until here)
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
+      $this->assertEquals(200, $res['statusCode']);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $accessToken);
+      $this->assertEquals('ADMIN', $res['data']['permission']['code']);
+      $this->assertEquals(true, $res['data']['permission']['granted']);
+    }
+
+    function testAdminAccessToken() {
+      $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
+      $accessToken = sha1('somerandomaccesstoken');
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $accessToken);
+      // we expect neither to find a session
+      $this->assertEquals(404, $res['statusCode']);
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $accessToken);
+      // neither to have any admin privileges
+      $this->assertEquals('ADMIN', $res['data']['permission']['code']);
+      $this->assertEquals(false, $res['data']['permission']['granted']);
+      // but we should have both with ad admin access token:
+      // a valid session
+      $res = ApiControllerTest::send_test('GET', 'auth/session/', null, $adminAccessToken);
+      $this->assertEquals($adminAccessToken, $res['data']['session']['accesstoken']);
+      $this->assertTrue($res['data']['session']['is_valid']);
+      // and admin permission(s)
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/ADMIN', null, $adminAccessToken);
+      $this->assertEquals('ADMIN', $res['data']['permission']['code']);
+      $this->assertEquals(true, $res['data']['permission']['granted']);
+    }
+
+    function testRequiredFields() {
+      $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');
+      $res = ApiControllerTest::send_test('GET', 'auth/permission/', null, $adminAccessToken);
+      $this->assertEquals("The URL parameter `ID` is required", $res['data']['error']);
+      $this->assertEquals(422, $res['data']['code']);
+    }
 
     function testTypeOfFields() {
       $adminAccessToken = Config::inst()->get('AuthSession', 'adminAccessToken');

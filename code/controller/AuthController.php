@@ -48,7 +48,7 @@ class AuthController extends ApiController {
       $session = $this->getSessionFromRequest();
       $this->restfulSession = $session;
       $this->setSessionByApiSession();
-      return ($session) ? $this->sendData($session) : $this->sendNotFound();
+      return ($session) ? $this->sendData(array("session" => $session)) : $this->sendNotFound();
     } else if ($this->request->isPOST()) {
       $data = $this->request->data;
       $member = Member::get()->filter(array("Email" => $data->email))->First();
@@ -70,7 +70,7 @@ class AuthController extends ApiController {
         $session->Member = $member;
         $session->MemberID = $member->ID;
         $session->write();
-        return $this->sendSuccessfulPost($session);
+        return $this->sendSuccessfulPost(array("session" => $session));
       }
       return $this->sendError("Couldn't match password / email", 400);
     } else if ($this->request->isDELETE()) {

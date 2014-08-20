@@ -86,5 +86,24 @@ class ApiDataObjectTest extends SapphireTest {
       }
     }
 
+    function testToNestedArray() {
+      $data = [
+        "message" => "Test",
+      ];
+      ApiDataObject::to_nested_array($data, 1, $a);
+      $this->assertEquals($data, $a);
+      $member = $this->objFromFixture('Member', 'api');
+      $a = null;
+      ApiDataObject::to_nested_array($member, 1, $a);
+      $this->assertEquals($member->ID, $a['id']);
+      $this->assertEquals($member->Email, $a['email']);
+      $list = new ArrayList([ $this->objFromFixture('Member', 'api'), $this->objFromFixture('Member', 'admin') ]);
+      $a = null;
+      ApiDataObject::to_nested_array($list, 1, $a);
+      $this->assertEquals(2, sizeof($a));
+      $this->assertEquals($list[0]->ID, $a[0]['id']);
+      $this->assertEquals($list[1]->ID, $a[1]['id']);
+    }
+
     // TODO: populateWithData, populateWithArrayData, inheritedApiFields
 }

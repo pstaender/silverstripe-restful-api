@@ -293,32 +293,17 @@ class ApiController extends Controller {
     if ($data) {
       $this->dataRecord = $data;
     }
-    if ($this->dataRecord) {
-      if (is_a($this->dataRecord, 'DataList')) {
-        $api["data"] = [];
-        foreach($this->dataRecord as $item) {
-          if (is_callable([$item,'forApi'])) {
-            $api["data"][] = $item->forApi();
-          } else if (is_callable([$item,'toMap'])) {
-            $api["data"][] = $item->toMap();
-          } else {
-            $api["data"][] = $item;
-          }
+    ApiDataObject::to_nested_array($data, 0, $data);
+    $api['data'] = $data;
+    if (!$this->config()->get('useDataProperty')) {
+      if (is_array($api['data'])) {
+        foreach($api['data'] as $key => $value) {
+          $api[$key] = $value;
         }
-      } else if (is_a($this->dataRecord, 'DataObject')) {
-        if ($this->dataRecord->hasMethod('forApi')) {
-          // if we have an APIDataObject (best practice)
-          $api["data"] = $this->dataRecord->forApi();
-        } else if ($this->dataRecord->hasMethod('toMap')) {
-          // if we have an DataObject
-          $api["data"] = $this->dataRecord->toMap();
-        }
-      } else if (is_array($this->dataRecord)) {
-        $api["data"] = $this->dataRecord;
       } else {
-        $this->error = "There is no valid object to map for the api.";
-        $this->code = 500;
+        $api = $api['data'];
       }
+      unset($api['data']);
     }
     if ($this->code) {
       $api["code"] = $this->code;

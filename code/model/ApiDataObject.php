@@ -40,6 +40,40 @@ class ApiDataObject extends DataExtension {
   }
 
   /**
+   * Convert recursive a mixed array (including DataLists and DataObject) to a pure associative array
+   * @param   mixed   $object     Can be an array or DataObject or DataList
+   * @param   int     $level      Prevent endless nested converting (should not occure anyway)
+   * @param   array   &$data      Return value (as reference)
+   */
+  static function to_nested_array($object, $level = 0, &$data) {
+    if ($level > 5) return null;
+    $level++;
+    $data = null;
+    if ((is_a($object, 'DataList')) || (is_a($object, 'ArrayList'))) {
+      $data = array();
+      foreach($object as $item) {
+        self::to_nested_array($item, $level, $data[]);
+      }
+    } else if (is_a($object, 'DataObject')) {
+      if ($object->hasMethod('forApi')) {
+        // if we have an APIDataObject (best practice)
+        $data = $object->forApi();
+      } else if ($object->hasMethod('toMap')) {
+        // if we have an DataObject
+        $data = $object->toMap();
+      }
+    } else if (is_array($object)) {
+      $data = array();
+      foreach($object as $key => $value) {
+        self::to_nested_array($value, $level, $data[$key]);
+      }
+    } else {
+      // primitive data type
+      $data = $object;
+    }
+  }
+
+  /**
    * Array of inherited static desriptions of `api_fields`
    * Copied from @DataOject->inheritedDatabaseFields()
    * @return array fields
