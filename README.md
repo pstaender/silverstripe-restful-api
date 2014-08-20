@@ -25,6 +25,9 @@ AuthSession:
   requiredGroup: null
   requiredPermission: null
   urlSegment: 'auth'
+ApiSchemaController:
+  allowedModels:
+    - Member
 DataObject:
   jsonDateFormat: 'D M d Y H:i:s O'
   underscoreFields: true

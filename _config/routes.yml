@@ -6,3 +6,4 @@ After:
 Director:
   rules:
     'auth//$Action/$ID/$OtherID': 'AuthController'
+    'schema/$Model!//$Action': 'ApiSchemaController'
