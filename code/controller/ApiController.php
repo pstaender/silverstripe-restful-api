@@ -68,8 +68,12 @@ class ApiController extends Controller {
     $data = $this->requestBodyAsArray();
     $d = array();
 
-    foreach($data as $key => $value) {
-      $d[ApiDataObject::real_field_name($key, $className)] = $value;
+    if (is_array($data)) {
+      foreach($data as $key => $value) {
+        $d[ApiDataObject::real_field_name($key, $className)] = $value;
+      }
+    } else {
+      $d = array();
     }
     return $d;
   }
