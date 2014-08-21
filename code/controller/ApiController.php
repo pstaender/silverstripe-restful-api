@@ -343,6 +343,50 @@ class ApiController extends Controller {
     );
   }
 
+  function queryParametersToSQLFilter($parameters = null, $class = null) {
+    if (!is_array($parameters)) {
+      $class = $parameters;
+      $parameters = $this->request->getVars();
+      unset($parameters['url']); // is used by silverstripe
+    }
+    $filter = array();
+    $underscoreFields = $this->config()->get('underscoreFields');
+    foreach($parameters as $field => $value) {
+      $searchFilterModifier = '';
+      // http://doc.silverstripe.com/framework/en/topics/datamodel
+      if (($value[0] === '%')&&($value[strlen($value)-1] === '%')) {
+        $searchFilterModifier = ':PartialMatch';
+        $value = substr($value, 1, -1);
+      } else if ($value[0] === '%') {
+        $searchFilterModifier = ':EndsWith';
+        $value = substr($value, 0, -1);
+      } else if ($value[strlen($value)-1]==='%') {
+        $searchFilterModifier = ':StartsWith';
+        $value = substr($value, 0, -1);
+      } elseif ($value[0] === '!') {
+        $searchFilterModifier = ':Negation';
+        $value = substr($value, 1);
+      } elseif (substr($value, 0, 2) === '<=') {
+        $searchFilterModifier = ':LessThanOrEqual';
+        $value = substr($value, 2);
+      } elseif ($value[0] === '<') {
+        $searchFilterModifier = ':LessThan';
+        $value = substr($value, 1);
+      } elseif (substr($value, 0, 2) === '>=') {
+        $searchFilterModifier = ':GreaterThanOrEqual';
+        $value = substr($value, 2);
+      } elseif ($value[0] === '<') {
+        $searchFilterModifier = ':GreaterThan';
+        $value = substr($value, 1);
+      }
+      if (($underscoreFields) && ($class)) {
+        $field = ApiDataObject::real_field_name($field, $class);
+      }
+      $filter[$field.$searchFilterModifier] = $value;
+    }
+    return $filter;
+  }
+
   function sendData($data = null, $code = null) {
     $apiData = $this->prepareApiData($data);
     if ($apiData === null) {
