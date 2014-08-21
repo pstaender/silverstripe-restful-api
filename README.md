@@ -199,7 +199,9 @@ How to define your own API Controller including some methods (we assume that you
       "GET:client"    => true,                // everyone can read here
       "DELETE:client" => 'ADMIN',             // only admins can delete
       "POST:client"   => '->isBasicApiUser',  // method `isBasicApiUser` checks permission
-      ]
+    ];
+
+    private static $api_model = "Client"; // this is to connect this controller to a specific model (important for field matching)
 
     /**
      * Will respond with a JSON object and 200 if found

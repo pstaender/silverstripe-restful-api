@@ -64,9 +64,15 @@ class ApiController extends Controller {
     return (is_array($data)) ? new ArrayData($data) : null;
   }
 
-  protected function requestDataAsArray($className) {
+  protected function requestDataAsArray($className = null) {
     $data = $this->requestBodyAsArray();
     $d = array();
+    if (!$className) {
+      $className = $this->stat('api_model');
+      if (!$className) {
+        user_error("You have to reference the controller to a Model class. Recommend way is to use Controller::\$api_model = '…'");
+      }
+    }
 
     if (is_array($data)) {
       foreach($data as $key => $value) {
@@ -78,8 +84,8 @@ class ApiController extends Controller {
     return $d;
   }
 
-  protected function requestDataAsDataObject($className) {
-    $data = $this->requestDataAsArray();
+  protected function requestDataAsDataObject($className = null) {
+    $data = $this->requestDataAsArray($className);
     return (is_array($data)) ? new ArrayData($data) : null;
   }
 
@@ -348,6 +354,9 @@ class ApiController extends Controller {
       $class = $parameters;
       $parameters = $this->request->getVars();
       unset($parameters['url']); // is used by silverstripe
+    }
+    if (!$class) {
+      $class = $this->stat('api_model');
     }
     $filter = array();
     $underscoreFields = $this->config()->get('underscoreFields');

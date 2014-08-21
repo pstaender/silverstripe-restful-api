@@ -82,6 +82,8 @@ class Country_Controller extends ApiController {
     "DELETE:index" => "admin",
   ];
 
+  private static $api_model = "Country"; // important to match underscore to CamelCase fieldnames
+
   /* Instead of using `indexGET()`/`indexPOST()`/… you could
      define `index()` and seperate inside the function
      with `$this->request->isGET()` … the default way in SilverStripe
@@ -106,7 +108,7 @@ class Country_Controller extends ApiController {
   function indexPUT() {
     $id = $this->request->param("ID");
     $country = Country::get()->byID($id);
-    $data = $this->requestDataAsArray('Country');
+    $data = $this->requestDataAsArray();
     if ($country) {
       $country->populateWithData($data, ["Name", "Lon", "Lat", "Code", "Color", "Note"]);
       $country->write();

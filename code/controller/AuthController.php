@@ -43,6 +43,8 @@ class AuthController extends ApiController {
     "GET:testSendingEmptyData"        => true,
   );
 
+  private static $api_model = "AuthSession";
+
   function session() {
     if ($this->request->isGET()) {
       $session = $this->getSessionFromRequest();
