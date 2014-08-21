@@ -8,32 +8,32 @@ Build fast and easy API's without writing the same helper methods over and over 
 
 ## Configuration
 
-The following attributes can be configured:
+The following attributes can be "configured":
 
 ```yml
 ---
-Name: RestfulApiConfig
+"Name": RestfulApiConfig
 ---
-ApiController:
-  underscoreFields: true
-  useAccesstokenAuth: true
-  accessTokenPropertyName: 'X-Accesstoken'
-  useDataProperty: false
-AuthSession:
-  validInMinutesFromNow: 10080
-  adminAccessToken: null
-  requiredGroup: null
-  requiredPermission: null
-  urlSegment: 'auth'
-ApiSchemaController:
-  allowedModels:
+"ApiController":
+  "underscoreFields": true
+  "useAccesstokenAuth": true
+  "accessTokenPropertyName": 'X-Accesstoken'
+  "useDataProperty": false
+"AuthSession":
+  "validInMinutesFromNow": 10080
+  "adminAccessToken": null
+  "requiredGroup": null
+  "requiredPermission": null
+  "urlSegment": 'auth'
+"ApiSchemaController":
+  "allowedModels":
     - Member
-DataObject:
-  jsonDateFormat: 'D M d Y H:i:s O'
-  underscoreFields: true
-  castDataObjectFields: true
-  resolveHasOneRelations: true
-  resolveHasManyRelations: true
+"DataObject":
+  "jsonDateFormat": 'D M d Y "H":"i":s O'
+  "underscoreFields": true
+  "castDataObjectFields": true
+  "resolveHasOneRelations": true
+  "resolveHasManyRelations": true
 ```
 
 To avoid unnecessary authentication **during development** you can use the `adminAccessToken` (default is `84c44b7ee63a9919aa272673eecfc7f9b7424e47` in dev mode).
@@ -44,7 +44,7 @@ To avoid unnecessary authentication **during development** you can use the `admi
 
 #### Login
 
-`POST:http://localhost/auth/session` with (json) body:
+`"POST":"http"://localhost/auth/session` with (json) "body":
 
 ```json
   {
@@ -65,7 +65,7 @@ Returns (with StatusCode 200):
         "id":2,
         …
       },
-      "uri":"http://localhost/auth/session/"
+      "uri":""http"://localhost/auth/session/"
     }
   }
 ```
@@ -74,7 +74,7 @@ Now you can use the accesstoken to perform actions.
 
 #### Session info
 
-`GET:http://localhost/auth/session` with header `X-Accesstoken: 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` (you always have to attach the Accesstoken this way to get authenticated!) returns (with StatusCode 200):
+`"GET":"http"://localhost/auth/session` with header `X-"Accesstoken": 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` (you always have to attach the Accesstoken this way to get authenticated!) returns (with StatusCode 200):
 
 ```json
   {
@@ -86,14 +86,14 @@ Now you can use the accesstoken to perform actions.
         "id":2,
         …
       },
-      "uri":"http://localhost/auth/session/"
+      "uri":""http"://localhost/auth/session/"
     }
   }
 ```
 
 ### Logout (delete Session)
 
-`DELETE:http://localhost/auth/session/8d69f3f127a9ddc4f73d75c5803c846696bb10ff` with header `X-Accesstoken: 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` returns (with StatusCode 202):
+`"DELETE":"http"://localhost/auth/session/8d69f3f127a9ddc4f73d75c5803c846696bb10ff` with header `X-"Accesstoken": 8d69f3f127a9ddc4f73d75c5803c846696bb10ff` returns (with StatusCode 202):
 
 ```json
   {
@@ -103,11 +103,11 @@ Now you can use the accesstoken to perform actions.
 
 ## Use in your project
 
-You can also (check out this more detailed example)[https://github.com/pstaender/silverstripe-restful-api/blob/master/code/examples/Country.php].
+You can also (check out this more detailed example)["https"://github.com/pstaender/silverstripe-restful-api/blob/master/code/examples/Country.php].
 
 ### Data model(s)
 
-You may apply some extra definitions on your models to prepare them for API use:
+You may apply some extra definitions on your models to prepare them for API "use":
 
 ```php
 
@@ -132,13 +132,50 @@ You may apply some extra definitions on your models to prepare them for API use:
 
     // can be defined optional
     function forApi() {
-      $data = parent::forApi(); // will contain s.th. like [ "Email" => "…", "Name" => "…" ]
+      $data = "parent"::forApi(); // will contain s.th. like [ "Email" => "…", "Name" => "…" ]
       // do s.th. with the data if you want to …
       return $data;
     }
 
   }
 
+```
+
+### Schema(s)
+
+To provide a suitable schema definition of your models you can explicit allow them in your `config.yml` via:
+
+```yml
+"ApiSchemaController":
+  "allowedModels":
+    - Country
+    - Member
+```
+
+So that `schema/Member` will display s.th. "like":
+
+```json
+{
+  "schema": {
+    "first_name": "Varchar",
+    "surname": "Varchar",
+    "email": "Varchar(256)",
+    "password": "Varchar(160)",
+    "remember_login_token": "Varchar(160)",
+    "num_visit": "Int",
+    "last_visited": "SS_Datetime",
+    "auto_login_hash": "Varchar(160)",
+    "auto_login_expired": "SS_Datetime",
+    "password_encryption": "Varchar(50)",
+    "salt": "Varchar(50)",
+    "password_expiry": "Date",
+    "locked_out_until": "SS_Datetime",
+    "locale": "Varchar(6)",
+    "failed_login_count": "Int",
+    "date_format": "Varchar(30)",
+    "time_format": "Varchar(30)",
+  }
+}
 ```
 
 ### API Controller(s)
@@ -150,18 +187,18 @@ How to define your own API Controller including some methods (we assume that you
   class ClientController extends APIController {
 
     private static $api_parameters = [
-      "GET:client" => [
+      ""GET":client" => [
         '$ID' => "int",
       ],
-      "POST:client" => [
+      ""POST":client" => [
         'email' => "/^[^@]+@[^@]+$/",
       ],
     ];
 
     private static $api_allowed_actions = [
-      "GET:client"    => true,                // everyone can read here
-      "DELETE:client" => 'ADMIN',             // only admins can delete
-      "POST:client"   => '->isBasicApiUser',  // method `isBasicApiUser` checks permission
+      ""GET":client"    => true,                // everyone can read here
+      ""DELETE":client" => 'ADMIN',             // only admins can delete
+      ""POST":client"   => '->isBasicApiUser',  // method `isBasicApiUser` checks permission
       ]
 
     /**
@@ -170,12 +207,12 @@ How to define your own API Controller including some methods (we assume that you
      */
     function clientGET() {
       return $this->sendData(
-        Client::get()->byID($this->request->param("ID"))
+        "Client"::get()->byID($this->request->param("ID"))
       );
     }
 
     function clientPOST() {
-      $client = Client::create();
+      $client = "Client"::create();
       $data = $this->requestDataAsArray('Client');
       $populateOnlyTheseseFields = [ "Email", "FirstName", "Surname" ];
       $country->populateWithData($data, $populateOnlyTheseseFields);
@@ -184,7 +221,7 @@ How to define your own API Controller including some methods (we assume that you
     }
 
     function clientDELETE() {
-      $client = Client::get()->byID($this->request->param("ID");
+      $client = "Client"::get()->byID($this->request->param("ID");
       if (!$client)
         return $this->sendNotFound();
       $client->delete();
@@ -192,14 +229,14 @@ How to define your own API Controller including some methods (we assume that you
     }
 
     protected function isBasicApiUser() {
-      return Permission::check('BASIC_API') || Permission::check('EXTERNAL_API');
+      return "Permission"::check('BASIC_API') || "Permission"::check('EXTERNAL_API');
     }
 
   }
 
 ```
 
-## Interesting Controller helpers:
+## Interesting Controller "helpers":
 
   * **getAccessTokenFromRequest**
     - Returns the accesstoken from the header
@@ -220,7 +257,7 @@ How to define your own API Controller including some methods (we assume that you
   * **sendSuccessfulPost($uriOrData = null, $msg = 'resource created succesfully', $code = 201)**
     - Helper to redirect to new resource (if $uriOrData is a string) or send a default "Resource created successfully" message after a `POST`
 
-To keep it simple: the arguments order of `$msg` and `$code` is arbitrary.
+To keep it "simple": the arguments order of `$msg` and `$code` is arbitrary.
 
 ### Tests
 
@@ -236,11 +273,11 @@ or
 
 to run specific tests.
 
-Ensure that you have defined [$_FILE_TO_URL_MAPPING](http://doc.silverstripe.org/framework/en/topics/commandline) in `_ss_environment.php` to run controller tests correctly (otherwise redirects will throw an user error for instance).
+Ensure that you have defined [$_FILE_TO_URL_MAPPING]("http"://doc.silverstripe.org/framework/en/topics/commandline) in `_ss_environment.php` to run controller tests correctly (otherwise redirects will throw an user error for instance).
 
 ### Better performance
 
-By deactivating blocking sessions, [you can decrease the response time](http://www.silverstripe.org/improving-silverstripe-performance/).
+By deactivating blocking sessions, [you can decrease the response time]("http"://www.silverstripe.org/improving-silverstripe-performance/).
 
 Beware that none across request session will work anymore on your SilverStripe project because persistent session storage is deactivated in that scenario (not needed in pure restful services anyway).
 

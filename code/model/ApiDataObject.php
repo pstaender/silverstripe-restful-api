@@ -85,7 +85,7 @@ class ApiDataObject extends DataExtension {
     while($currentObj != 'DataObject') {
       $apiFields  = singleton($currentObj)->stat('api_fields');
       if ($apiFields === null) {
-        $apiFields = $this->owner->stat('db');
+        $apiFields = Config::inst()->get($this->owner->class, 'db', Config::INHERITED);//$this->owner->stat('db');
         $fields['ID'] = 'ID'; // we have to add manually 'ID'
         $fields['ClassName'] = 'ClassName';
         $fields['Created'] = 'Created';
@@ -145,6 +145,7 @@ class ApiDataObject extends DataExtension {
     $databaseFields = $this->owner->inheritedDatabaseFields();//DataObject::database_fields($this->owner->class);
 
     $apiFields = (isset($options['fields'])) ? $options['fields'] : $this->inheritedApiFields();
+
     if (!is_array($apiFields)) {
       // use inherited database fields
       $apiFields = $databaseFields;

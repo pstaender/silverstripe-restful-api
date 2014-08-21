@@ -14,7 +14,7 @@ AuthSession:
   urlSegment: 'auth'
 ApiSchemaController:
   allowedModels:
-    - Member
+    - File
 DataObject:
   jsonDateFormat: 'D M d Y H:i:s O'
   underscoreFields: true
