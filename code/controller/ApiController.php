@@ -48,10 +48,13 @@ class ApiController extends Controller {
    */
   protected function setSessionByApiSession() {
     $id = (($this->restfulSession)&&($this->restfulSession->MemberID)) ? $this->restfulSession->MemberID : 0;//(($this->restfulSession)&&($this->restfulSession->Member())) ? $this->restfulSession->Member()->ID : null;
-    if ($id)
+    if ($id) {
       Session::set("loggedInAs", $id);
-    else
+    } else if ($this->config()->get('useAccesstokenExclusivelyAsAuthentication')){
       Session::clear('loggedInAs');
+    } else {
+      $id = Member::currentUserID();
+    }
     return $id;
   }
 

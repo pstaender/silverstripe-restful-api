@@ -6,6 +6,7 @@ ApiController:
   useAccesstokenAuth: true
   accessTokenPropertyName: 'X-Accesstoken'
   useDataProperty: false
+  useAccesstokenExclusivelyAsAuthentication: true
 AuthSession:
   validInMinutesFromNow: 10080
   adminAccessToken: null
