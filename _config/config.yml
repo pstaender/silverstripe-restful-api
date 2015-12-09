@@ -13,6 +13,7 @@ AuthSession:
   requiredGroup: null
   requiredPermission: null
   urlSegment: 'auth'
+  checkDefaultAdminUsermaneAndPassword: true # checks for SS_DEFAULT_ADMIN_USERNAME and SS_DEFAULT_ADMIN_PASSWORD
 ApiSchemaController:
   allowedModels:
     - File
@@ -24,9 +25,3 @@ DataObject:
   resolveHasManyRelations: true
   extensions:
     - ApiDataObject
----
-Except:
-  environment: 'live'
----
-AuthSession:
-  adminAccessToken: 84c44b7ee63a9919aa272673eecfc7f9b7424e47

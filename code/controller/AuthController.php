@@ -54,7 +54,16 @@ class AuthController extends ApiController {
     } else if ($this->request->isPOST()) {
       $data = $this->request->data;
       $member = Member::get()->filter(array("Email" => $data->email))->First();
-      if (($member)&&($member->checkPassword($data->password)->valid())) {
+      $passwordIsValid = null;
+      // we also check (if is set to true) for default admin username + password (good for quick dev testing)
+      if (($this->config()->get('checkDefaultAdminUsermaneAndPassword')) && ($member)) {
+        if ((defined('SS_DEFAULT_ADMIN_USERNAME')) && (SS_DEFAULT_ADMIN_USERNAME === $member->Email) && (defined('SS_DEFAULT_ADMIN_PASSWORD')) && (SS_DEFAULT_ADMIN_PASSWORD === $data->password) ) {
+          $passwordIsValid = true;
+        } else {
+          $passwordIsValid = $member->checkPassword($data->password)->valid();
+        }
+      }
+      if (($member)&&($passwordIsValid)) {
         // TODO: check for group / permission
         if ($requiredGroup = Config::inst()->get('AuthSession', 'requiredGroup')) {
           // check that user is in Group

@@ -22,6 +22,13 @@ class ApiControllerTest extends SapphireTest {
     if ($accessToken) {
       $headers['X-Accesstoken'] = $accessToken;
     }
+    // TODO:
+    // ---
+    // Except:
+    //   environment: 'live'
+    // ---
+    // AuthSession:
+    //   adminAccessToken: 84c44b7ee63a9919aa272673eecfc7f9b7424e47
     return Director::test($url, $postVars = null, $session = null, $httpMethod = $method, $body, $headers);
   }
 
@@ -65,7 +72,7 @@ class ApiControllerTest extends SapphireTest {
         "jsonDateFormat" => 'D M d Y H:i:s O',
         "underscoreFields" => true,
         "castDataObjectFields" => true,
-        "useDataProperty" => false, 
+        "useDataProperty" => false,
       ],
     ];
     foreach($expectedConfig as $className => $fields) {

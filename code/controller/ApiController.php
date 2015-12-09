@@ -108,7 +108,7 @@ class ApiController extends Controller {
     $data = null;
     $contentType = (isset($headers['Content-Type'])) ? $headers['Content-Type'] : null;
     // parse json
-    if (preg_match('/json$/',$contentType)) {
+    if (preg_match('/json/i',$contentType)) {
       $data = json_decode($body, true);
       if (!$data) {
         $msg = null;
