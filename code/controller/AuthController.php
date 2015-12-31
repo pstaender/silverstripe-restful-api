@@ -1,8 +1,9 @@
 <?php
 
-class AuthController extends ApiController {
+class AuthController extends ApiController
+{
 
-  private static $api_parameters = array(
+    private static $api_parameters = array(
     "GET:session" => array(
       '$ID' => "*",
     ),
@@ -21,7 +22,7 @@ class AuthController extends ApiController {
     )
   );
 
-  private static $api_allowed_actions = array(
+    private static $api_allowed_actions = array(
     "GET:index"                       => true,
     "POST:session"                    => true,
     "GET:session"                     => true,
@@ -43,115 +44,128 @@ class AuthController extends ApiController {
     "GET:testSendingEmptyData"        => true,
   );
 
-  private static $api_model = "AuthSession";
+    private static $api_model = "AuthSession";
 
-  function session() {
-    if ($this->request->isGET()) {
-      $session = $this->getSessionFromRequest();
-      $this->restfulSession = $session;
-      $this->setSessionByApiSession();
-      return ($session) ? $this->sendData(array("session" => $session)) : $this->sendNotFound();
-    } else if ($this->request->isPOST()) {
-      $data = $this->request->data;
-      $member = Member::get()->filter(array("Email" => $data->email))->First();
-      if (($member)&&($member->checkPassword($data->password)->valid())) {
-        // TODO: check for group / permission
+    public function session()
+    {
+        if ($this->request->isGET()) {
+            $session = $this->getSessionFromRequest();
+            $this->restfulSession = $session;
+            $this->setSessionByApiSession();
+            return ($session) ? $this->sendData(array("session" => $session)) : $this->sendNotFound();
+        } elseif ($this->request->isPOST()) {
+            $data = $this->request->data;
+            $member = Member::get()->filter(array("Email" => $data->email))->First();
+            if (($member)&&($member->checkPassword($data->password)->valid())) {
+                // TODO: check for group / permission
         if ($requiredGroup = Config::inst()->get('AuthSession', 'requiredGroup')) {
-          // check that user is in Group
+            // check that user is in Group
           if (!$member->inGroup($requiredGroup)) {
-            return $this->sendPermissionFailure("Member is not in the required group `$requiredGroup`");
+              return $this->sendPermissionFailure("Member is not in the required group `$requiredGroup`");
           }
         }
-        if ($requiredPermission = Config::inst()->get('AuthSession', 'requiredPermission')) {
-          // check that member has required permission
+                if ($requiredPermission = Config::inst()->get('AuthSession', 'requiredPermission')) {
+                    // check that member has required permission
           if (!Permission::checkMember($member, $requiredPermission)) {
-            return $this->sendPermissionFailure("Member has no `$requiredPermission` permission");
+              return $this->sendPermissionFailure("Member has no `$requiredPermission` permission");
           }
+                }
+                $session = new AuthSession();
+                $session->Member = $member;
+                $session->MemberID = $member->ID;
+                $session->write();
+                return $this->sendSuccessfulPost(array("session" => $session));
+            }
+            return $this->sendError("Couldn't match password / email", 400);
+        } elseif ($this->request->isDELETE()) {
+            if ($session = $this->restfulSession) {
+                $session->delete();
+                return $this->sendSuccessfulDelete();
+            } else {
+                return $this->sendNotFound('No session could be detected');
+            }
         }
-        $session = new AuthSession();
-        $session->Member = $member;
-        $session->MemberID = $member->ID;
-        $session->write();
-        return $this->sendSuccessfulPost(array("session" => $session));
-      }
-      return $this->sendError("Couldn't match password / email", 400);
-    } else if ($this->request->isDELETE()) {
-      if ($session = $this->restfulSession) {
-        $session->delete();
-        return $this->sendSuccessfulDelete();
-      } else {
-        return $this->sendNotFound('No session could be detected');
-      }
     }
-  }
 
-  function sessions() {
-    if (!$this->isValidApiSession())
-      return $this->sendInvalidApiSession();
-    if ($this->request->isGET()) {
-      return $this->sendData(array(
+    public function sessions()
+    {
+        if (!$this->isValidApiSession()) {
+            return $this->sendInvalidApiSession();
+        }
+        if ($this->request->isGET()) {
+            return $this->sendData(array(
         "count" => AuthSession::get()->filter(array(
           "MemberID" => $this->restfulSession->Member()->ID
         ))->Count()
       ));
-    } else if ($this->request->isDELETE()) {
-      AuthSession::get()->filter(array(
+        } elseif ($this->request->isDELETE()) {
+            AuthSession::get()->filter(array(
         "MemberID" => $this->restfulSession->Member()->ID
       ))->removeAll();
-      return $this->sendSuccessfulDelete();
+            return $this->sendSuccessfulDelete();
+        }
     }
-  }
 
-  function permissionGET() {
-    $code = $this->request->param("ID");
-    return $this->sendData(array(
+    public function permissionGET()
+    {
+        $code = $this->request->param("ID");
+        return $this->sendData(array(
       "permission" => array(
         "code"    => $code,
         "granted" => Permission::check($code),
       ),
     ));
-  }
+    }
 
-  function testIsValidSession() {
-    return $this->sendData(array(
+    public function testIsValidSession()
+    {
+        return $this->sendData(array(
       "message" => "This data should only be seen if we have a valid session",
     ));
-  }
+    }
 
-  function testPermissionFailure() {
-    return $this->sendPermissionFailure();
-  }
+    public function testPermissionFailure()
+    {
+        return $this->sendPermissionFailure();
+    }
 
-  function testSendError() {
-    return $this->sendError();
-  }
+    public function testSendError()
+    {
+        return $this->sendError();
+    }
 
-  function testSuccessfulPut() {
-    return $this->sendSuccessfulPut();
-  }
+    public function testSuccessfulPut()
+    {
+        return $this->sendSuccessfulPut();
+    }
 
-  function testSendSuccessfulDelete() {
-    return $this->sendSuccessfulDelete();
-  }
+    public function testSendSuccessfulDelete()
+    {
+        return $this->sendSuccessfulDelete();
+    }
 
-  function testSendNotFound() {
-    return $this->sendNotFound();
-  }
+    public function testSendNotFound()
+    {
+        return $this->sendNotFound();
+    }
 
-  function testSendSuccessfulPost() {
-    return $this->sendSuccessfulPost();
-  }
+    public function testSendSuccessfulPost()
+    {
+        return $this->sendSuccessfulPost();
+    }
 
-  function testAPIPermission() {
-    return $this->testIsValidSession();
-  }
+    public function testAPIPermission()
+    {
+        return $this->testIsValidSession();
+    }
 
-  function testADMINPermission() {
-    return $this->testIsValidSession();
-  }
+    public function testADMINPermission()
+    {
+        return $this->testIsValidSession();
+    }
 
-  function testSendingEmptyData() {
-    return $this->sendData(Member::get()->byID(52435435324));
-  }
-
+    public function testSendingEmptyData()
+    {
+        return $this->sendData(Member::get()->byID(52435435324));
+    }
 }
