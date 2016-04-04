@@ -408,7 +408,8 @@ class ApiController extends Controller {
     $this->response = new SS_HTTPResponse();
     $this->response->addHeader('Content-Type', 'application/'.$this->format);
     $this->response->setStatusCode(($this->statusCode) ? $this->statusCode : ((is_int($this->code)) ? $this->code : 200));
-    return json_encode($apiData);
+    $this->response->setBody(json_encode($apiData, JSON_PRETTY_PRINT));
+    return $this->response;
   }
 
   function sendJSON($data = null, $code = null) {
