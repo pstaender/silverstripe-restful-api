@@ -22,6 +22,7 @@ DataObject:
   castDataObjectFields: true
   resolveHasOneRelations: true
   resolveHasManyRelations: true
+  resolveHasManyManyRelations: true
   extensions:
     - ApiDataObject
 ---

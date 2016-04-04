@@ -142,6 +142,7 @@ class ApiDataObject extends DataExtension {
     $castDataObjectFields = $this->owner->config()->get('castDataObjectFields');
     $resolveHasOneRelations = (isset($options['resolveHasOneRelations'])) ? $options['resolveHasOneRelations'] : (($this->owner->config()->get('resolveHasOneRelations') !== null) ? $this->owner->config()->get('resolveHasOneRelations') : true );
     $resolveHasManyRelations = (isset($options['resolveHasManyRelations'])) ? $options['resolveHasManyRelations'] : (($this->owner->config()->get('resolveHasManyRelations') !== null) ? $this->owner->config()->get('resolveHasManyRelations') : true );
+    $resolveHasManyManyRelations = (isset($options['resolveHasManyManyRelations'])) ? $options['resolveHasManyManyRelations'] : (($this->owner->config()->get('resolveHasManyManyRelations') !== null) ? $this->owner->config()->get('resolveHasManyManyRelations') : true );
     $databaseFields = $this->owner->inheritedDatabaseFields();//DataObject::database_fields($this->owner->class);
 
     $apiFields = (isset($options['fields'])) ? $options['fields'] : $this->inheritedApiFields();
@@ -177,10 +178,10 @@ class ApiDataObject extends DataExtension {
     }
 
     if ($resolveHasManyRelations) {
-      $hasOne = Config::inst()->get($this->owner->class, 'has_many', Config::INHERITED);
+      $many = Config::inst()->get($this->owner->class, 'has_many', Config::INHERITED);
       $e = array();
-      if ($hasOne) {
-        foreach(array_keys($hasOne) as $relationName) {
+      if ($many) {
+        foreach(array_keys($many) as $relationName) {
           if ($this->owner->hasMethod($relationName)) {
 
             $fieldName = $relationName;
@@ -189,6 +190,30 @@ class ApiDataObject extends DataExtension {
             }
             $o = $options;
             $o['resolveHasManyRelations'] = false;
+            $relations = $this->owner->{$relationName}();
+            // we only add the record if it exists in the db
+            foreach($relations as $relation) {
+              if ($relation->isInDB())
+                $data[$fieldName][] = $relation->forApi($o);
+            }
+          }
+        }
+      }
+    }
+
+    if ($resolveHasManyManyRelations) {
+      $many = Config::inst()->get($this->owner->class, 'many_many', Config::INHERITED);
+      $e = array();
+      if ($many) {
+        foreach(array_keys($many) as $relationName) {
+          if ($this->owner->hasMethod($relationName)) {
+
+            $fieldName = $relationName;
+            if ($underscoreFields) {
+              $fieldName = self::to_underscore($fieldName);
+            }
+            $o = $options;
+            $o['resolveHasManyManyRelations'] = false;
             $relations = $this->owner->{$relationName}();
             // we only add the record if it exists in the db
             foreach($relations as $relation) {
