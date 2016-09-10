@@ -118,7 +118,7 @@ class ApiDataObject extends DataExtension {
     if (preg_match("/\_id$/", $field)) {
       return $field = ApiDataObject::to_camelcase($field, $checkID = true);
     } else if (preg_match("/^[a-z\_0-9]+$/", $field)) {
-      foreach($ownerClass->inheritedApiFields() as $fieldName => $type) {
+      foreach($ownerClass->inheritedApiFields() as $fieldName) {
         if (strtolower($fieldName)===$fieldnameWithoutUnderscore)
           return $fieldName;
       }
